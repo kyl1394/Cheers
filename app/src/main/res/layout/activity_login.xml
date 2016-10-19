@@ -12,20 +12,21 @@
     android:background="@color/bg">
 
     <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:srcCompat="@drawable/winebg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/transparentmap"
         android:id="@+id/imageView2"
-        android:layout_margin="0dp"
-        android:layout_marginBottom="0dp"
-        android:layout_marginEnd="0dp"
-        android:layout_marginLeft="0dp"
-        android:layout_marginRight="0dp"
-        android:layout_marginStart="0dp"
-        android:layout_marginTop="0dp"
-        android:padding="0dp"
-        android:scaleType="centerCrop"
-        android:layout_alignRight="@+id/title_text_view" />
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        app:srcCompat="@drawable/winebg"
+        android:id="@+id/imageView"
+        android:layout_height="match_parent"
+        android:layout_marginStart="27dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:text="@string/login_title"
@@ -36,17 +37,18 @@
         android:textStyle="normal|bold"
         android:id="@+id/title_text_view"
         android:textColor="@color/com_facebook_button_border_color_focused"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
         android:layout_weight="0.93"
-        android:layout_marginTop="15dp" />
+        android:layout_marginTop="29dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="121dp"
         android:orientation="vertical"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true">
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="17dp">
 
         <Button
             android:text="@string/create_account"
