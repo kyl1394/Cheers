@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">WeDrink!</string>
+
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+
+    <string name="facebook_app_id">302513443465700</string>
+    <string name="login_title">Cheers!</string>
+    <string name="logo_description">Logo</string>
+    <string name="create_account">Create Account</string>
+</resources>
