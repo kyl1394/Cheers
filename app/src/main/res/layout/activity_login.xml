@@ -10,82 +10,48 @@
     tools:context="com.victoryroad.cheers.LoginActivity"
     android:weightSum="1"
     android:background="@color/bg">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/transparentmap"
+        android:id="@+id/imageView2"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:text="@string/login_title"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/content_view">
+        android:layout_height="wrap_content"
+        android:textSize="64sp"
+        android:textAlignment="center"
+        android:textStyle="normal|bold"
+        android:id="@+id/title_text_view"
+        android:textColor="@color/com_facebook_button_border_color_focused"
+        android:layout_weight="0.93"
+        android:layout_marginTop="29dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/transparentmap"
-            android:id="@+id/imageView2"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentStart="true" />
+    <ImageView
+        app:srcCompat="@drawable/winebg"
+        android:id="@+id/imageView"
+        android:layout_width="match_parent"
+        android:layout_centerInParent="false"
+        android:layout_alignWithParentIfMissing="false"
+        android:layout_gravity="bottom|right"
+        android:layout_height="622dp"
+        android:layout_alignTop="@+id/title_text_view"
+        android:layout_alignParentStart="true" />
 
-        <TextView
-            android:text="@string/login_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="64sp"
-            android:textAlignment="center"
-            android:textStyle="normal|bold"
-            android:id="@+id/title_text_view"
-            android:textColor="@color/com_facebook_button_border_color_focused"
-            android:layout_weight="0.93"
-            android:layout_marginTop="29dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentStart="true" />
+    <fragment
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:name="com.victoryroad.cheers.LoginFragment"
+        android:id="@+id/fragment"
+        tools:layout="@layout/fragment_login"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="65dp" />
 
-        <ImageView
-            app:srcCompat="@drawable/winebg"
-            android:id="@+id/imageView"
-            android:layout_height="742dp"
-            android:layout_width="match_parent"
-            android:layout_centerInParent="false"
-            android:layout_alignWithParentIfMissing="false"
-            android:layout_gravity="bottom|right"
-            android:layout_marginTop="64dp"
-            android:layout_alignTop="@+id/title_text_view"
-            android:layout_alignParentEnd="true" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="121dp"
-            android:orientation="vertical"
-            android:id="@+id/control_view"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginBottom="53dp">
-
-            <Button
-                android:text="@string/create_account"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:textAlignment="center"
-                android:layout_marginLeft="30dp"
-                android:layout_marginRight="30dp"
-                android:layout_alignParentTop="true"
-                android:layout_alignEnd="@+id/login_button"
-                android:layout_marginTop="10dp"
-                android:paddingBottom="10dp"
-                android:paddingTop="10dp"
-                android:id="@+id/create_account_button"
-                android:textAllCaps="false" />
-
-            <com.facebook.login.widget.LoginButton
-                android:id="@+id/login_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:layout_marginLeft="30dp"
-                android:layout_marginRight="30dp"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="10dp"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp" />
-
-        </LinearLayout>
-
-    </RelativeLayout>
+</RelativeLayout>
