@@ -1,12 +1,23 @@
 package com.victoryroad.cheers;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
+
+import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -83,11 +94,25 @@ public class HomePageActivity extends AppCompatActivity {
         }
     };
 
+    private CallbackManager callbackManager;
+    private LoginButton loginButton;
+    private AccessTokenTracker accessTokenTracker;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        FacebookSdk.sdkInitialize(getApplicationContext());
+
+        accessTokenTracker = new AccessTokenTracker() {
+            @Override
+            protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken newAccessToken) {
+                updateWithToken(newAccessToken);
+            }
+        };
 
         setContentView(R.layout.activity_home_page);
+        callbackManager = CallbackManager.Factory.create();
+        loginButton = (LoginButton) findViewById(R.id.login_button);
 
         mVisible = true;
         //mControlsView = findViewById(R.id.fullscreen_content_controls);
@@ -116,6 +141,17 @@ public class HomePageActivity extends AppCompatActivity {
         // created, to briefly hint to the user that UI controls
         // are available.
         delayedHide(100);
+    }
+
+    private void updateWithToken(AccessToken accessToken) {
+        if (accessToken != null) {
+
+        } else {
+            loginButton.setVisibility(View.INVISIBLE); //<- IMPORTANT
+            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
     private void toggle() {

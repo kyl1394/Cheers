@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -33,41 +34,52 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.On
         FacebookSdk.sdkInitialize(getApplicationContext());
         hideStatusBar();
 
-        setContentView(R.layout.activity_login);
-        callbackManager = CallbackManager.Factory.create();
+        if (isLoggedIn()) {
+            Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+            startActivity(intent);
+            finish();
+        } else {
+            setContentView(R.layout.activity_login);
+            callbackManager = CallbackManager.Factory.create();
 
-        loginButton = (LoginButton) findViewById(R.id.login_button);
+            loginButton = (LoginButton) findViewById(R.id.login_button);
 
-        LoginManager.getInstance().registerCallback(callbackManager,
-                new FacebookCallback<LoginResult>() {
-                    @Override
-                    public void onSuccess(LoginResult loginResult) {
-                        loginButton.setVisibility(View.INVISIBLE); //<- IMPORTANT
-                        Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
-                        startActivity(intent);
-                        finish();//<- IMPORTANT
-                    }
+            LoginManager.getInstance().registerCallback(callbackManager,
+                    new FacebookCallback<LoginResult>() {
+                        @Override
+                        public void onSuccess(LoginResult loginResult) {
+                            loginButton.setVisibility(View.INVISIBLE); //<- IMPORTANT
+                            Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                            startActivity(intent);
+                            finish();//<- IMPORTANT
+                        }
 
-                    @Override
-                    public void onCancel() {
-                        // App code
-                    }
+                        @Override
+                        public void onCancel() {
+                            // App code
+                        }
 
-                    @Override
-                    public void onError(FacebookException exception) {
-                        // App code
-                    }
-                });
+                        @Override
+                        public void onError(FacebookException exception) {
+                            // App code
+                        }
+                    });
 
-        TextView titleTextView = (TextView) findViewById(R.id.title_text_view);
-        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/appo_paint.otf");
-        titleTextView.setTypeface(typeface);
+            TextView titleTextView = (TextView) findViewById(R.id.title_text_view);
+            Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/appo_paint.otf");
+            titleTextView.setTypeface(typeface);
+        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+    public boolean isLoggedIn() {
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        return accessToken != null;
     }
 
     private void hideStatusBar() {
