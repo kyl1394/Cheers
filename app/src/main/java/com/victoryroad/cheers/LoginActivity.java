@@ -35,7 +35,7 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.On
         hideStatusBar();
 
         if (isLoggedIn()) {
-            Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(intent);
             finish();
         } else {
@@ -49,7 +49,7 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.On
                         @Override
                         public void onSuccess(LoginResult loginResult) {
                             loginButton.setVisibility(View.INVISIBLE); //<- IMPORTANT
-                            Intent intent = new Intent(getApplicationContext(), HomePageActivity.class);
+                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                             startActivity(intent);
                             finish();//<- IMPORTANT
                         }
