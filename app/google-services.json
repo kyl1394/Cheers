@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "341362595217",
+    "firebase_url": "https://cheers-1477086181536.firebaseio.com",
+    "project_id": "cheers-1477086181536",
+    "storage_bucket": "cheers-1477086181536.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:341362595217:android:1f86ea6149478830",
+        "android_client_info": {
+          "package_name": "com.victoryroad.cheers"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "341362595217-jf7sp1o04spdl1ve75rfe974nes2k6lc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpc4sns4oqkTGWr2pHYcZ7HUU0DB2FhE4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
