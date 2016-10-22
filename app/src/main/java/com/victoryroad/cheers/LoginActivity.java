@@ -18,15 +18,22 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.Profile;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class LoginActivity extends AppCompatActivity implements LoginFragment.OnFragmentInteractionListener {
     private CallbackManager callbackManager;
     private LoginButton loginButton;
+    private String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +55,9 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.On
                     new FacebookCallback<LoginResult>() {
                         @Override
                         public void onSuccess(LoginResult loginResult) {
+                            userId = Profile.getCurrentProfile().getId();
+                            checkIfUserExists();
+
                             loginButton.setVisibility(View.INVISIBLE); //<- IMPORTANT
                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                             startActivity(intent);
@@ -69,6 +79,24 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.On
             Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/appo_paint.otf");
             titleTextView.setTypeface(typeface);
         }
+    }
+
+    private void checkIfUserExists() {
+        final DatabaseReference firebaseDbRef = FirebaseDatabase.getInstance().getReference();
+
+        firebaseDbRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(!dataSnapshot.hasChild(userId)) {
+                    firebaseDbRef.child(userId).setValue(Profile.getCurrentProfile().getName());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override
