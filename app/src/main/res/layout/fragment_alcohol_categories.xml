@@ -1,0 +1,15 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.victoryroad.cheers.AlcoholCategoriesFragment">
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:entries="@array/sports_array"
+        android:divider="@drawable/list_divider"
+        android:dividerHeight="2dp"
+        android:id="@+id/alcoholCategoriesListView" />
+
+</FrameLayout>

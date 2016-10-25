@@ -6,11 +6,10 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <ListView
+    <fragment
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:entries="@array/sports_array"
-        android:divider="@drawable/list_divider"
-        android:dividerHeight="2dp" />
-
+        android:layout_height="wrap_content"
+        android:id="@+id/alcoholList"
+        android:name="com.victoryroad.cheers.EmptyFragment"
+        tools:layout="@layout/fragment_empty" />
 </LinearLayout>

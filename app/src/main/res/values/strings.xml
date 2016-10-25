@@ -29,6 +29,15 @@
         <item>Chess</item>
         <item>Hockey</item>
     </string-array>
+    <string-array name="sports2_array">
+        <item>2Shuttl2e Badminton</item>
+        <item>2Tenni2s</item>
+        <item>2FootB22all</item>
+        <item>2Baske2t Ball</item>
+        <item>2Tabl2e Tennis</item>
+        <item>2Che2ss</item>
+        <item>2Ho2ckey</item>
+    </string-array>
     <string name="large_text">
         "Material is the metaphor.\n\n"
 
