@@ -1,5 +1,6 @@
 package com.victoryroad.cheers;
 
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.design.widget.TabLayout;
@@ -81,6 +82,12 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
 
         //noinspection SimplifiableIfStatement
         switch (id) {
+            case R.id.action_add_drink:
+                // Create new fragment and transaction
+                Intent addDrinkIntent = new Intent(getApplicationContext(), AddDrinkActivity.class);
+                startActivity(addDrinkIntent);
+                //finish(); // Possibly might cause issues?
+                break;
             case R.id.action_settings:
                 return true;
             case R.id.action_logout_button:
