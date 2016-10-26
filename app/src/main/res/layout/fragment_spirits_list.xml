@@ -7,9 +7,8 @@
     <ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:entries="@array/sports2_array"
         android:divider="@drawable/list_divider"
         android:dividerHeight="2dp"
-        android:id="@+id/alcoholCategoriesListView" />
+        android:id="@+id/spiritsCategoryListView" />
 
 </FrameLayout>

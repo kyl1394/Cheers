@@ -58,7 +58,11 @@
         <activity
             android:name=".AddDrinkActivity"
             android:label="Cheers!"
-            android:theme="@style/AppTheme"/>
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.victoryroad.cheers.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

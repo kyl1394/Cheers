@@ -7,6 +7,21 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 
 /**
@@ -28,6 +43,9 @@ public class SpiritsListFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+
+    private ListView listView;
+    private ArrayAdapter mAdapter;
 
     public SpiritsListFragment() {
         // Required empty public constructor
@@ -60,11 +78,52 @@ public class SpiritsListFragment extends Fragment {
         }
     }
 
+    private void addToCategoryList(String str) {
+        mAdapter.add(str);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+                if (listView.getItemAtPosition(position).equals("Spirits")) {
+                    SpiritsListFragment spiritsListFragment = new SpiritsListFragment();
+                    FragmentSwitcher.replaceFragmentWithAnimation(getFragmentManager(), spiritsListFragment, "");
+                }
+            }
+        });
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_spirits_list, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_spirits_list, container, false);
+
+        final DatabaseReference firebaseDbRef = FirebaseDatabase.getInstance().getReference("Categories").child("Spirits");
+        ListView spiritsListView = (ListView) rootView.findViewById(R.id.alcoholCategoriesListView);
+
+        List<String> initialList = new ArrayList<String>(); //load these
+        listView = (ListView) rootView.findViewById(R.id.spiritsCategoryListView);
+
+        mAdapter = new ArrayAdapter(getApplicationContext(), R.layout.list_item, initialList);
+        listView.setAdapter(mAdapter);
+
+        firebaseDbRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Iterator iter = dataSnapshot.getChildren().iterator();
+                while (iter.hasNext()) {
+                    DataSnapshot child = (DataSnapshot) iter.next();
+                    addToCategoryList(child.getValue().toString());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        return rootView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event

@@ -20,23 +20,11 @@
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="adddrinkbutton">addDrinkButton</string>
     <string name="title_activity_add_drink">AddDrinkActivity</string>
-    <string-array name="sports_array">
-        <item>Shuttle Badminton</item>
-        <item>Tennis</item>
-        <item>FootBall</item>
-        <item>Basket Ball</item>
-        <item>Table Tennis</item>
-        <item>Chess</item>
-        <item>Hockey</item>
+    <string-array name="alcohol_category_array">
+
     </string-array>
-    <string-array name="sports2_array">
-        <item>2Shuttl2e Badminton</item>
-        <item>2Tenni2s</item>
-        <item>2FootB22all</item>
-        <item>2Baske2t Ball</item>
-        <item>2Tabl2e Tennis</item>
-        <item>2Che2ss</item>
-        <item>2Ho2ckey</item>
+    <string-array name="wine_category_array">
+
     </string-array>
     <string name="large_text">
         "Material is the metaphor.\n\n"

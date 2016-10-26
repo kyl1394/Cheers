@@ -4,12 +4,25 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.facebook.Profile;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
 
@@ -33,6 +46,11 @@ public class AlcoholCategoriesFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+    private ArrayList<String> listItems=new ArrayList<String>();
+
+    private ListView listView;
+    private ArrayAdapter mAdapter;
+
 
     public AlcoholCategoriesFragment() {
         // Required empty public constructor
@@ -65,19 +83,46 @@ public class AlcoholCategoriesFragment extends Fragment {
         }
     }
 
+    private void addToCategoryList(String str) {
+        mAdapter.add(str);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+                if (listView.getItemAtPosition(position).equals("Spirits")) {
+                    SpiritsListFragment spiritsListFragment = new SpiritsListFragment();
+                    FragmentSwitcher.replaceFragmentWithAnimation(getFragmentManager(), spiritsListFragment, "");
+                }
+            }
+        });
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_alcohol_categories, container, false);
 
-        ListView listView = (ListView) rootView.findViewById(R.id.alcoholCategoriesListView);
+        final DatabaseReference firebaseDbRef = FirebaseDatabase.getInstance().getReference("Categories");
+        listView = (ListView) rootView.findViewById(R.id.alcoholCategoriesListView);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View view,
-                                    int position, long id) {
-                SpiritsListFragment spiritsListFragment = new SpiritsListFragment();
-                FragmentSwitcher.replaceFragmentWithAnimation(getFragmentManager(), spiritsListFragment, "");
+        List<String> initialList = new ArrayList<String>(); //load these
+        mAdapter = new ArrayAdapter(getApplicationContext(), R.layout.list_item, initialList);
+        listView.setAdapter(mAdapter);
+
+        firebaseDbRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Iterator iter = dataSnapshot.getChildren().iterator();
+                while (iter.hasNext()) {
+                    DataSnapshot child = (DataSnapshot) iter.next();
+                    addToCategoryList(child.getKey());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
             }
         });
 
