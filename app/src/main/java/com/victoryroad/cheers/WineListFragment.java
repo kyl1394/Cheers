@@ -4,16 +4,13 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
-import com.facebook.Profile;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -30,12 +27,12 @@ import static com.facebook.FacebookSdk.getApplicationContext;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link AlcoholCategoriesFragment.OnFragmentInteractionListener} interface
+ * {@link WineListFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link AlcoholCategoriesFragment#newInstance} factory method to
+ * Use the {@link WineListFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class AlcoholCategoriesFragment extends Fragment {
+public class WineListFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -46,12 +43,11 @@ public class AlcoholCategoriesFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
-    private ArrayList<String> listItems=new ArrayList<String>();
 
     private ListView listView;
     private ArrayAdapter mAdapter;
 
-    public AlcoholCategoriesFragment() {
+    public WineListFragment() {
         // Required empty public constructor
     }
 
@@ -61,11 +57,11 @@ public class AlcoholCategoriesFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment AlcoholCategoriesFragment.
+     * @return A new instance of fragment WineListFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static AlcoholCategoriesFragment newInstance(String param1, String param2) {
-        AlcoholCategoriesFragment fragment = new AlcoholCategoriesFragment();
+    public static WineListFragment newInstance(String param1, String param2) {
+        WineListFragment fragment = new WineListFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -82,27 +78,16 @@ public class AlcoholCategoriesFragment extends Fragment {
         }
     }
 
+    // TODO: This is so bad, such code very copy
     private void addToCategoryList(String str) {
         mAdapter.add(str);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                Fragment fragment = null;
-                switch(listView.getItemAtPosition(position).toString()) {
-                    case "Spirits":
-                        fragment = new SpiritsListFragment();
-                        break;
-                    case "Beer":
-                        fragment = new BeerListFragment();
-                        break;
-                    case "Wine":
-                        fragment = new WineListFragment();
-                        break;
-                }
-
-                if (fragment != null) {
-                    FragmentSwitcher.replaceFragmentWithAnimation(getFragmentManager(), fragment, "");
+                if (listView.getItemAtPosition(position).equals("Wine")) {
+                    WineListFragment wineListFragment = new WineListFragment();
+                    FragmentSwitcher.replaceFragmentWithAnimation(getFragmentManager(), wineListFragment, "");
                 }
             }
         });
@@ -112,12 +97,13 @@ public class AlcoholCategoriesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_alcohol_categories, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_wine_list, container, false);
 
-        final DatabaseReference firebaseDbRef = FirebaseDatabase.getInstance().getReference("Categories");
-        listView = (ListView) rootView.findViewById(R.id.alcoholCategoriesListView);
+        final DatabaseReference firebaseDbRef = FirebaseDatabase.getInstance().getReference("Categories").child("Wine");
 
         List<String> initialList = new ArrayList<String>(); //load these
+        listView = (ListView) rootView.findViewById(R.id.wineCategoryListView);
+
         mAdapter = new ArrayAdapter(getApplicationContext(), R.layout.list_item, initialList);
         listView.setAdapter(mAdapter);
 
@@ -127,7 +113,7 @@ public class AlcoholCategoriesFragment extends Fragment {
                 Iterator iter = dataSnapshot.getChildren().iterator();
                 while (iter.hasNext()) {
                     DataSnapshot child = (DataSnapshot) iter.next();
-                    addToCategoryList(child.getKey());
+                    addToCategoryList(child.getValue().toString());
                 }
             }
 

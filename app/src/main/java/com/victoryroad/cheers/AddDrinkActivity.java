@@ -11,7 +11,14 @@ import android.view.MenuItem;
 
 import java.io.Console;
 
-public class AddDrinkActivity extends AppCompatActivity implements AlcoholCategoriesFragment.OnFragmentInteractionListener, SpiritsListFragment.OnFragmentInteractionListener, EmptyFragment.OnFragmentInteractionListener, FragmentManager.OnBackStackChangedListener {
+public class AddDrinkActivity
+        extends AppCompatActivity
+        implements AlcoholCategoriesFragment.OnFragmentInteractionListener,
+        SpiritsListFragment.OnFragmentInteractionListener,
+        WineListFragment.OnFragmentInteractionListener,
+        BeerListFragment.OnFragmentInteractionListener,
+        EmptyFragment.OnFragmentInteractionListener,
+        FragmentManager.OnBackStackChangedListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
