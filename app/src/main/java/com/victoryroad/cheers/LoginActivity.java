@@ -65,18 +65,23 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.On
                                 profileTracker = new ProfileTracker() {
                                     @Override
                                     protected void onCurrentProfileChanged(Profile profile, Profile profile2) {
-                                        userId = profile2.getId();
-                                        checkIfUserExists();
-
-                                        loginButton.setVisibility(View.INVISIBLE); //<- IMPORTANT
-                                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                                        startActivity(intent);
-                                        finish();//<- IMPORTANT
+                                        login(profile2);
                                     }
                                 };
+                            } else {
+                                login(Profile.getCurrentProfile());
                             }
                         }
 
+                        public void login(Profile profile2) {
+                            userId = profile2.getId();
+                            checkIfUserExists();
+
+                            loginButton.setVisibility(View.INVISIBLE); //<- IMPORTANT
+                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                            startActivity(intent);
+                            finish();//<- IMPORTANT
+                        }
                         @Override
                         public void onCancel() {
                             // App code
