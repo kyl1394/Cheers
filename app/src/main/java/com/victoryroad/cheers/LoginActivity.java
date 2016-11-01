@@ -82,7 +82,7 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.On
     }
 
     private void checkIfUserExists() {
-        final DatabaseReference firebaseDbRef = FirebaseDatabase.getInstance().getReference();
+        final DatabaseReference firebaseDbRef = FirebaseDatabase.getInstance().getReference("Users");
 
         firebaseDbRef.addValueEventListener(new ValueEventListener() {
             @Override

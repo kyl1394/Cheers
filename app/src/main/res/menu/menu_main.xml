@@ -18,8 +18,8 @@
         android:title="@string/action_logout"
         app:showAsAction="never"/>
     <item
-        android:id="@+id/action_cart"
-        android:icon="@drawable/beer"
+        android:id="@+id/action_add_drink"
+        android:icon="@drawable/addbeer"
         android:orderInCategory="100"
         app:showAsAction="ifRoom"
         android:title="@string/adddrinkbutton"/>
