@@ -18,7 +18,10 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.Profile;
+import com.facebook.ProfileTracker;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
@@ -28,12 +31,15 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.json.JSONObject;
+
 import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class LoginActivity extends AppCompatActivity implements LoginFragment.OnFragmentInteractionListener {
     private CallbackManager callbackManager;
     private LoginButton loginButton;
     private String userId;
+    private ProfileTracker profileTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,13 +61,20 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.On
                     new FacebookCallback<LoginResult>() {
                         @Override
                         public void onSuccess(LoginResult loginResult) {
-                            userId = Profile.getCurrentProfile().getId();
-                            checkIfUserExists();
+                            if (Profile.getCurrentProfile() == null) {
+                                profileTracker = new ProfileTracker() {
+                                    @Override
+                                    protected void onCurrentProfileChanged(Profile profile, Profile profile2) {
+                                        userId = profile2.getId();
+                                        checkIfUserExists();
 
-                            loginButton.setVisibility(View.INVISIBLE); //<- IMPORTANT
-                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                            startActivity(intent);
-                            finish();//<- IMPORTANT
+                                        loginButton.setVisibility(View.INVISIBLE); //<- IMPORTANT
+                                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                        startActivity(intent);
+                                        finish();//<- IMPORTANT
+                                    }
+                                };
+                            }
                         }
 
                         @Override
