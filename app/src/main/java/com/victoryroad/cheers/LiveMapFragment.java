@@ -1,31 +1,28 @@
 package com.victoryroad.cheers;
 
-import android.*;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import static com.google.android.gms.wearable.DataMap.TAG;
 
@@ -170,17 +167,12 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
         myMap.getUiSettings().setZoomControlsEnabled(true);
         try {
             if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
+
                 ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_REQUEST );
-                return;
+
+            } else {
+                myMap.setMyLocationEnabled(true);
             }
-            myMap.setMyLocationEnabled(true);
 
         } catch(Exception e) {
             e.printStackTrace();
@@ -189,10 +181,6 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
         // Needs to call MapsInitializer before doing any CameraUpdateFactory calls
         MapsInitializer.initialize(this.getActivity());
 
-        Location current = myMap.getMyLocation();
-
-
-        //myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(myMap.getMyLocation().getLatitude(), myMap.getMyLocation().getLongitude()), 16.0f));
         GoogleMap.OnMyLocationChangeListener listener = new GoogleMap.OnMyLocationChangeListener() {
 
             @Override
@@ -215,10 +203,11 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
         };
 
         myMap.setOnMyLocationChangeListener(listener);
-    }
 
-    private void finishInitMap() {
 
+        Handler handler = new Handler();
+
+        //handler.postDelayed();
     }
 
     public void onRequestPermissionsResult(int requestCode,
@@ -228,9 +217,14 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
                 if (grantResults.length > 1
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED
                         && grantResults[1] == PackageManager.PERMISSION_GRANTED)
-                    finishInitMap();
+
                     break;
         }
+    }
+
+    //TODO use this function
+    public void addMarker(String title, double longitude, double latitude) {
+        myMap.addMarker(new MarkerOptions().title(title).position(new LatLng(longitude, latitude)));
     }
 
     /**
@@ -245,6 +239,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
+        // We aren't using this. When we add funcitonality to only load markers that the user can see, we will use this.
         void onFragmentInteraction(Uri uri);
     }
 }
