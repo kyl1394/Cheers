@@ -189,14 +189,27 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
         // Needs to call MapsInitializer before doing any CameraUpdateFactory calls
         MapsInitializer.initialize(this.getActivity());
 
+        Location current = myMap.getMyLocation();
+
+
+        //myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(myMap.getMyLocation().getLatitude(), myMap.getMyLocation().getLongitude()), 16.0f));
         GoogleMap.OnMyLocationChangeListener listener = new GoogleMap.OnMyLocationChangeListener() {
 
             @Override
             public void onMyLocationChange(Location location) {
+
                 LatLng loc = new LatLng(location.getLatitude(), location.getLongitude());
                 //mMarker = mMap.addMarker(new MarkerOptions().position(loc));
-                if(myMap != null){
+                if(myMap != null) {
                     myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, 16.0f));
+
+                    //Replace the Listener to do nothing
+                    myMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
+                        @Override
+                        public void onMyLocationChange(Location location) {
+                            //Do Nothing
+                        }
+                    });
                 }
             }
         };
