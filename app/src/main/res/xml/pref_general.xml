@@ -30,4 +30,8 @@
         android:positiveButtonText="@null"
         android:title="@string/pref_title_add_friends_to_messages" />
 
+    <Preference
+        android:key="custom_contact"
+        android:title="@string/pref_title_custom_contact"/>
+
 </PreferenceScreen>

@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -13,13 +14,17 @@ import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceScreen;
+import android.provider.ContactsContract;
 import android.support.v7.app.ActionBar;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -176,11 +181,31 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class GeneralPreferenceFragment extends PreferenceFragment {
+        private static final int PICK_CONTACT = 1;
+
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_general);
             setHasOptionsMenu(true);
+
+            PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(getActivity());
+
+
+            Preference customContact = findPreference("custom_contact");
+            customContact.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent i = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+                    startActivityForResult(i, PICK_CONTACT);
+                    return true;
+                }
+            });
+
+            screen.addPreference(customContact);
+            //setPreferenceScreen(screen);
+            //addPreferencesFromResource(R.xml.pref_general);
 
             // Bind the summaries of EditText/List/Dialog/Ringtone preferences
             // to their values. When their values change, their summaries are
@@ -188,6 +213,29 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("example_text"));
             bindPreferenceSummaryToValue(findPreference("example_list"));
+        }
+
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            switch(requestCode){
+                case PICK_CONTACT:
+                    if(resultCode == RESULT_OK) {
+                        String name = "";
+
+                        Uri contactURI = data.getData();
+
+                        Cursor cursor = getActivity().getContentResolver().query(contactURI, null, null, null, null, null);
+
+                        if(cursor.moveToFirst()) {
+                            name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+                        }
+
+                        findPreference("custom_contact").setSummary(name);
+
+                        Log.d("General Preferences", name);
+                    }
+                    break;
+            }
         }
 
         @Override
