@@ -14,9 +14,6 @@ import java.io.Console;
 public class AddDrinkActivity
         extends AppCompatActivity
         implements AlcoholCategoriesFragment.OnFragmentInteractionListener,
-        SpiritsListFragment.OnFragmentInteractionListener,
-        WineListFragment.OnFragmentInteractionListener,
-        BeerListFragment.OnFragmentInteractionListener,
         EmptyFragment.OnFragmentInteractionListener,
         FragmentManager.OnBackStackChangedListener {
 
@@ -30,7 +27,7 @@ public class AddDrinkActivity
 
         AlcoholCategoriesFragment alcoholCategoriesFragment = new AlcoholCategoriesFragment();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.alcoholList, alcoholCategoriesFragment);
+        transaction.add(R.id.alcoholList, alcoholCategoriesFragment, "INNER_CATEGORY_FRAGMENT");
         transaction.commit();
 
         //Listen for changes in the back stack
@@ -53,6 +50,11 @@ public class AddDrinkActivity
                 if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
                     NavUtils.navigateUpFromSameTask(this);
                     return true;
+                } else {
+                    AlcoholCategoriesFragment fragment = ((AlcoholCategoriesFragment) getSupportFragmentManager().findFragmentByTag("INNER_CATEGORY_FRAGMENT"));
+                    if (fragment != null && fragment.mParam1.size() > 0) {
+                        fragment.mParam1.remove(fragment.mParam1.size() - 1);
+                    }
                 }
                 break;
         }

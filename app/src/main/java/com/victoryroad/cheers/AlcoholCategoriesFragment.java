@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,8 +43,10 @@ public class AlcoholCategoriesFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
+    public ArrayList<String> mParam1 = new ArrayList<>();
     private String mParam2;
+
+    private String category;
 
     private OnFragmentInteractionListener mListener;
     private ArrayList<String> listItems=new ArrayList<String>();
@@ -64,10 +67,10 @@ public class AlcoholCategoriesFragment extends Fragment {
      * @return A new instance of fragment AlcoholCategoriesFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static AlcoholCategoriesFragment newInstance(String param1, String param2) {
+    public static AlcoholCategoriesFragment newInstance(ArrayList<String> param1, String param2) {
         AlcoholCategoriesFragment fragment = new AlcoholCategoriesFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
+        args.putStringArrayList(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
@@ -77,7 +80,7 @@ public class AlcoholCategoriesFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
+            mParam1 = getArguments().getStringArrayList(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
@@ -88,22 +91,10 @@ public class AlcoholCategoriesFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                Fragment fragment = null;
-                switch(listView.getItemAtPosition(position).toString()) {
-                    case "Spirits":
-                        fragment = new SpiritsListFragment();
-                        break;
-                    case "Beer":
-                        fragment = new BeerListFragment();
-                        break;
-                    case "Wine":
-                        fragment = new WineListFragment();
-                        break;
-                }
+                mParam1.add(listView.getItemAtPosition(position).toString());
+                Fragment fragment = AlcoholCategoriesFragment.newInstance(mParam1, "");
 
-                if (fragment != null) {
-                    FragmentSwitcher.replaceFragmentWithAnimation(getFragmentManager(), fragment, "");
-                }
+                FragmentSwitcher.replaceFragmentWithAnimation(getFragmentManager(), fragment, "INNER_CATEGORY_FRAGMENT");
             }
         });
     }
@@ -114,7 +105,12 @@ public class AlcoholCategoriesFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_alcohol_categories, container, false);
 
-        final DatabaseReference firebaseDbRef = FirebaseDatabase.getInstance().getReference("Categories");
+        DatabaseReference firebaseDbRef = FirebaseDatabase.getInstance().getReference("Categories");
+        if (mParam1 != null) {
+            for (int i = 0; i < mParam1.size(); i++) {
+                firebaseDbRef = firebaseDbRef.child(mParam1.get(i));
+            }
+        }
         listView = (ListView) rootView.findViewById(R.id.alcoholCategoriesListView);
 
         List<String> initialList = new ArrayList<String>(); //load these
@@ -127,7 +123,13 @@ public class AlcoholCategoriesFragment extends Fragment {
                 Iterator iter = dataSnapshot.getChildren().iterator();
                 while (iter.hasNext()) {
                     DataSnapshot child = (DataSnapshot) iter.next();
-                    addToCategoryList(child.getKey());
+                    String data = "";
+                    if (mParam1.size() == 0)
+                        data = child.getKey();
+                    else
+                        data = child.getValue().toString();
+
+                    addToCategoryList(data);
                 }
             }
 
@@ -136,6 +138,26 @@ public class AlcoholCategoriesFragment extends Fragment {
 
             }
         });
+
+        if (mParam1.size() > 0) {
+            rootView.setFocusableInTouchMode(true);
+            rootView.requestFocus();
+            rootView.setOnKeyListener(new View.OnKeyListener() {
+                @Override
+                public boolean onKey(View v, int keyCode, KeyEvent event) {
+                    if (keyCode == KeyEvent.KEYCODE_BACK) {
+                        if (mParam1.size() > 0)
+                            mParam1.remove(mParam1.size() - 1);
+
+                        getFragmentManager().popBackStack();
+
+                        return true;
+                    }
+                    return false;
+                }
+            });
+        }
+
 
         return rootView;
     }

@@ -89,7 +89,9 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
                 //finish(); // Possibly might cause issues?
                 break;
             case R.id.action_settings:
-                return true;
+                startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
+                break;
+
             case R.id.action_logout_button:
                 LoginManager.getInstance().logOut();
                 Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
