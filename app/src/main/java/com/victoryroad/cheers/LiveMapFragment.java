@@ -1,28 +1,28 @@
 package com.victoryroad.cheers;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import static com.google.android.gms.wearable.DataMap.TAG;
 
@@ -40,6 +40,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final int LOCATION_REQUEST = 5;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -93,8 +94,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
             mMapView = (MapView) rootView.findViewById(R.id.mapView);
             mMapView.onCreate(savedInstanceState);
             mMapView.getMapAsync(this);
-        }
-        catch (InflateException e){
+        } catch (InflateException e) {
             Log.e(TAG, "Inflate exception");
         }
         return rootView;
@@ -135,30 +135,96 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
         super.onDestroy();
         mMapView.onDestroy();
     }
+
     @Override
-    public void onSaveInstanceState(Bundle outState)
-    {
+    public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         mMapView.onSaveInstanceState(outState);
     }
+
     @Override
-    public void onLowMemory()
-    {
+    public void onLowMemory() {
         super.onLowMemory();
         mMapView.onLowMemory();
     }
+
     @Override
     public void onResume() {
         super.onResume();
         mMapView.onResume();
     }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
     }
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        //todo
+        myMap = googleMap;
+
+        myMap.getUiSettings().setMyLocationButtonEnabled(true);
+        myMap.getUiSettings().setZoomControlsEnabled(true);
+        try {
+            if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_REQUEST );
+
+            } else {
+                myMap.setMyLocationEnabled(true);
+            }
+
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        // Needs to call MapsInitializer before doing any CameraUpdateFactory calls
+        MapsInitializer.initialize(this.getActivity());
+
+        GoogleMap.OnMyLocationChangeListener listener = new GoogleMap.OnMyLocationChangeListener() {
+
+            @Override
+            public void onMyLocationChange(Location location) {
+
+                LatLng loc = new LatLng(location.getLatitude(), location.getLongitude());
+                //mMarker = mMap.addMarker(new MarkerOptions().position(loc));
+                if(myMap != null) {
+                    myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, 16.0f));
+
+                    //Replace the Listener to do nothing
+                    myMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
+                        @Override
+                        public void onMyLocationChange(Location location) {
+                            //Do Nothing
+                        }
+                    });
+                }
+            }
+        };
+
+        myMap.setOnMyLocationChangeListener(listener);
+
+
+        Handler handler = new Handler();
+
+        //handler.postDelayed();
+    }
+
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch(requestCode) {
+            case LOCATION_REQUEST:
+                if (grantResults.length > 1
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED)
+
+                    break;
+        }
+    }
+
+    //TODO use this function
+    public void addMarker(String title, double longitude, double latitude) {
+        myMap.addMarker(new MarkerOptions().title(title).position(new LatLng(longitude, latitude)));
     }
 
     /**
@@ -173,6 +239,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
+        // We aren't using this. When we add funcitonality to only load markers that the user can see, we will use this.
         void onFragmentInteraction(Uri uri);
     }
 }
