@@ -26,11 +26,16 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity implements LoginFragment.OnFragmentInteractionListener {
     private CallbackManager callbackManager;
     private LoginButton loginButton;
     private String userId;
+    private UserDat User;
     private ProfileTracker profileTracker;
 
     @Override
@@ -67,10 +72,15 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.On
 
                         public void login(Profile profile2) {
                             userId = profile2.getId();
+                            String userName = Profile.getCurrentProfile().getName();
+                            //create user
+                            User = new UserDat(userId,userName);
+                            User.Checkins.put("blablaBla216548461","true");
                             checkAndAddUser();
 
                             loginButton.setVisibility(View.INVISIBLE); //<- IMPORTANT
                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                            intent.putExtra("User",(new Gson()).toJson(User));
                             startActivity(intent);
                             finish();//<- IMPORTANT
                         }
@@ -103,8 +113,10 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.On
         firebaseDbRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(!dataSnapshot.hasChild(userId)) { // check if the user is in our DB
-                    firebaseDbRef.child(userId).setValue("{\"Name\":\"" + Profile.getCurrentProfile().getName() + "\",\"Checkins\":{}");  // add user since they don't exist
+                if(!dataSnapshot.hasChild(User.getUserID())) { // check if the user is in our DB
+                    Map<String, Object> JsonUser = new HashMap<>();
+                    JsonUser.put(User.getUserID(),User);
+                    firebaseDbRef.updateChildren(JsonUser);  // add user since they don't exist
                 }
             }
 
