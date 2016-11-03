@@ -15,13 +15,16 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.facebook.Profile;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -44,7 +47,7 @@ public class AlcoholCategoriesFragment extends Fragment {
 
     // TODO: Rename and change types of parameters
     public ArrayList<String> mParam1 = new ArrayList<>();
-    private String mParam2;
+    private Boolean mParam2;
 
     private String category;
 
@@ -67,11 +70,11 @@ public class AlcoholCategoriesFragment extends Fragment {
      * @return A new instance of fragment AlcoholCategoriesFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static AlcoholCategoriesFragment newInstance(ArrayList<String> param1, String param2) {
+    public static AlcoholCategoriesFragment newInstance(ArrayList<String> param1, Boolean param2) {
         AlcoholCategoriesFragment fragment = new AlcoholCategoriesFragment();
         Bundle args = new Bundle();
         args.putStringArrayList(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putBoolean(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -81,29 +84,81 @@ public class AlcoholCategoriesFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mParam1 = getArguments().getStringArrayList(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            mParam2 = getArguments().getBoolean(ARG_PARAM2);
         }
     }
 
-    private void addToCategoryList(String str) {
-        mAdapter.add(str);
+    private void addToCategoryList() {
+        for (String drinkName : drinkList.keySet()) {
+            mAdapter.add(drinkName);
+        }
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                mParam1.add(listView.getItemAtPosition(position).toString());
-                Fragment fragment = AlcoholCategoriesFragment.newInstance(mParam1, "");
+                // if is the final drink in the hierarchy
+                String item = listView.getItemAtPosition(position).toString();
+                mParam1.add(item);
 
-                FragmentSwitcher.replaceFragmentWithAnimation(getFragmentManager(), fragment, "INNER_CATEGORY_FRAGMENT");
+                if (drinkList.get(item)) {
+                    populateListWithDrinksForCategory(listView.getItemAtPosition(position).toString());
+                } else {
+                    Fragment fragment = AlcoholCategoriesFragment.newInstance(mParam1, false);
+                    FragmentSwitcher.replaceFragmentWithAnimation(getFragmentManager(), fragment, "INNER_CATEGORY_FRAGMENT");
+                }
             }
         });
     }
 
+    private void populateListWithDrinksForCategory(final String category) {
+        final DatabaseReference firebaseDbRef = FirebaseDatabase.getInstance().getReference("Drinks");
+        drinkList = new HashMap<>();
+
+        firebaseDbRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Iterator iter = dataSnapshot.getChildren().iterator();
+                while (iter.hasNext()) {
+                    DataSnapshot child = (DataSnapshot) iter.next();
+                    Iterator childIterator = child.child("Categories").getChildren().iterator();
+                    while (childIterator.hasNext()) {
+                        DataSnapshot categoryChild = (DataSnapshot) childIterator.next();
+                        if (categoryChild.getKey().equals(category)) {
+                            drinkList.put(child.child("Name").getValue().toString(), false);
+                            break;
+                        }
+                    }
+                }
+
+                addToCategoryList();
+                Fragment fragment = AlcoholCategoriesFragment.newInstance(mParam1, true);
+                FragmentSwitcher.replaceFragmentWithAnimation(getFragmentManager(), fragment, "INNER_CATEGORY_FRAGMENT");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private static HashMap<String, Boolean> drinkList;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_alcohol_categories, container, false);
+        if (mParam2 == null || !mParam2) {
+            setupListForCategories(rootView);
+        } else {
+            setupListForDrinks(rootView);
+        }
+
+        return rootView;
+    }
+
+    private void setupListForCategories(View rootView) {
+        drinkList = new HashMap<>();
 
         DatabaseReference firebaseDbRef = FirebaseDatabase.getInstance().getReference("Categories");
         if (mParam1 != null) {
@@ -123,14 +178,14 @@ public class AlcoholCategoriesFragment extends Fragment {
                 Iterator iter = dataSnapshot.getChildren().iterator();
                 while (iter.hasNext()) {
                     DataSnapshot child = (DataSnapshot) iter.next();
-                    String data = "";
-                    if (mParam1.size() == 0)
-                        data = child.getKey();
-                    else
-                        data = child.getValue().toString();
 
-                    addToCategoryList(data);
+                    if (mParam1.size() == 0)
+                        drinkList.put(child.getKey(), !child.hasChildren());
+                    else
+                        drinkList.put(child.getValue().toString(), !child.hasChildren());
                 }
+
+                addToCategoryList();
             }
 
             @Override
@@ -157,9 +212,33 @@ public class AlcoholCategoriesFragment extends Fragment {
                 }
             });
         }
+    }
 
+    private void setupListForDrinks(View rootView) {
+        listView = (ListView) rootView.findViewById(R.id.alcoholCategoriesListView);
 
-        return rootView;
+        List<String> list = new ArrayList<>();
+        for (String key : drinkList.keySet()) {
+            list.add(key);
+        }
+
+        mAdapter = new ArrayAdapter(getApplicationContext(), R.layout.list_item, list);
+        listView.setAdapter(mAdapter);
+
+        rootView.setFocusableInTouchMode(true);
+        rootView.requestFocus();
+        rootView.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    mParam2 = false;
+                    getFragmentManager().popBackStack();
+
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     // TODO: Rename method, update argument and hook method into UI event
