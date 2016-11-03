@@ -1,4 +1,4 @@
-package com.victoryroad.cheers;
+package com.victoryroad.cheers.dataclasses;
 
 import java.util.ArrayList;
 import java.util.HashMap;

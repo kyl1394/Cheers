@@ -22,6 +22,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.victoryroad.cheers.dataclasses.CheckIn;
+import com.victoryroad.cheers.dataclasses.Drink;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -89,8 +91,8 @@ public class AlcoholCategoriesFragment extends Fragment {
     }
 
     private void addToCategoryList() {
-        for (String drinkName : drinkList.keySet()) {
-            mAdapter.add(drinkName);
+        for (String drink : categoryList.keySet()) {
+            mAdapter.add(drink);
         }
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -100,7 +102,7 @@ public class AlcoholCategoriesFragment extends Fragment {
                 String item = listView.getItemAtPosition(position).toString();
                 mParam1.add(item);
 
-                if (drinkList.get(item)) {
+                if (categoryList.get(item)) {
                     populateListWithDrinksForCategory(listView.getItemAtPosition(position).toString());
                 } else {
                     Fragment fragment = AlcoholCategoriesFragment.newInstance(mParam1, false);
@@ -124,7 +126,8 @@ public class AlcoholCategoriesFragment extends Fragment {
                     while (childIterator.hasNext()) {
                         DataSnapshot categoryChild = (DataSnapshot) childIterator.next();
                         if (categoryChild.getKey().equals(category)) {
-                            drinkList.put(child.child("Name").getValue().toString(), false);
+                            Drink drink = new Drink(child.child("Name").getValue().toString(), child.getKey());
+                            drinkList.put(drink.getName(), drink);
                             break;
                         }
                     }
@@ -142,7 +145,8 @@ public class AlcoholCategoriesFragment extends Fragment {
         });
     }
 
-    private static HashMap<String, Boolean> drinkList;
+    private static HashMap<String, Drink> drinkList;
+    private static HashMap<String, Boolean> categoryList;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -158,7 +162,7 @@ public class AlcoholCategoriesFragment extends Fragment {
     }
 
     private void setupListForCategories(View rootView) {
-        drinkList = new HashMap<>();
+        categoryList = new HashMap<>();
 
         DatabaseReference firebaseDbRef = FirebaseDatabase.getInstance().getReference("Categories");
         if (mParam1 != null) {
@@ -178,11 +182,7 @@ public class AlcoholCategoriesFragment extends Fragment {
                 Iterator iter = dataSnapshot.getChildren().iterator();
                 while (iter.hasNext()) {
                     DataSnapshot child = (DataSnapshot) iter.next();
-
-                    if (mParam1.size() == 0)
-                        drinkList.put(child.getKey(), !child.hasChildren());
-                    else
-                        drinkList.put(child.getValue().toString(), !child.hasChildren());
+                    categoryList.put(child.getKey(), !child.hasChildren());
                 }
 
                 addToCategoryList();
@@ -218,8 +218,8 @@ public class AlcoholCategoriesFragment extends Fragment {
         listView = (ListView) rootView.findViewById(R.id.alcoholCategoriesListView);
 
         List<String> list = new ArrayList<>();
-        for (String key : drinkList.keySet()) {
-            list.add(key);
+        for (String drink : drinkList.keySet()) {
+            list.add(drink);
         }
 
         mAdapter = new ArrayAdapter(getApplicationContext(), R.layout.list_item, list);

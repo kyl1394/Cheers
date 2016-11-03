@@ -27,6 +27,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
+import com.victoryroad.cheers.dataclasses.UserDat;
 
 import java.util.HashMap;
 import java.util.Map;
