@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -18,8 +16,6 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
 import com.facebook.Profile;
 import com.facebook.ProfileTracker;
 import com.facebook.login.LoginManager;
@@ -30,10 +26,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
-import org.json.JSONObject;
-
-import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class LoginActivity extends AppCompatActivity implements LoginFragment.OnFragmentInteractionListener {
     private CallbackManager callbackManager;
@@ -75,7 +67,7 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.On
 
                         public void login(Profile profile2) {
                             userId = profile2.getId();
-                            checkIfUserExists();
+                            checkAndAddUser();
 
                             loginButton.setVisibility(View.INVISIBLE); //<- IMPORTANT
                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
@@ -99,14 +91,20 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.On
         }
     }
 
-    private void checkIfUserExists() {
+    /******************************************************************************
+     *
+     * Checks Database for Facebook user ID number
+     * If the user is not found a new entry is created.
+     *
+     *****************************************************************************/
+    private void checkAndAddUser() {
         final DatabaseReference firebaseDbRef = FirebaseDatabase.getInstance().getReference("Users");
 
         firebaseDbRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(!dataSnapshot.hasChild(userId)) {
-                    firebaseDbRef.child(userId).setValue(Profile.getCurrentProfile().getName());
+                if(!dataSnapshot.hasChild(userId)) { // check if the user is in our DB
+                    firebaseDbRef.child(userId).setValue("{\"Name\":\"" + Profile.getCurrentProfile().getName() + "\",\"Checkins\":{}");  // add user since they don't exist
                 }
             }
 
