@@ -42,64 +42,72 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         FacebookSdk.sdkInitialize(getApplicationContext());
-        hideStatusBar();
 
-        if (isLoggedIn()) {
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(intent);
-            finish();
-        } else {
+        callbackManager = CallbackManager.Factory.create();
+        loginButton = (LoginButton) findViewById(R.id.login_button);
+
+        if (!isLoggedIn()) {
             setContentView(R.layout.activity_login);
-            callbackManager = CallbackManager.Factory.create();
-
-            loginButton = (LoginButton) findViewById(R.id.login_button);
-
-            LoginManager.getInstance().registerCallback(callbackManager,
-                    new FacebookCallback<LoginResult>() {
-                        @Override
-                        public void onSuccess(LoginResult loginResult) {
-                            if (Profile.getCurrentProfile() == null) {
-                                profileTracker = new ProfileTracker() {
-                                    @Override
-                                    protected void onCurrentProfileChanged(Profile profile, Profile profile2) {
-                                        login(profile2);
-                                    }
-                                };
-                            } else {
-                                login(Profile.getCurrentProfile());
-                            }
-                        }
-
-                        public void login(Profile profile2) {
-                            userId = profile2.getId();
-                            String userName = Profile.getCurrentProfile().getName();
-                            //create user
-                            User = new UserDat(userId,userName);
-                            checkAndAddUser();
-
-                            loginButton.setVisibility(View.INVISIBLE); //<- IMPORTANT
-                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                            intent.putExtra("User",(new Gson()).toJson(User));
-                            startActivity(intent);
-                            finish();//<- IMPORTANT
-                        }
-                        @Override
-                        public void onCancel() {
-                            // App code
-                        }
-
-                        @Override
-                        public void onError(FacebookException exception) {
-                            // App code
-                        }
-                    });
 
             TextView titleTextView = (TextView) findViewById(R.id.title_text_view);
             Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/appo_paint.otf");
             titleTextView.setTypeface(typeface);
+        } else {
+            if (Profile.getCurrentProfile() == null) {
+                setupProfileTracker();
+            } else {
+                login(Profile.getCurrentProfile());
+            }
         }
+
+        LoginManager.getInstance().registerCallback(callbackManager,
+            new FacebookCallback<LoginResult>() {
+                @Override
+                public void onSuccess(LoginResult loginResult) {
+                    if (Profile.getCurrentProfile() == null) {
+                        setupProfileTracker();
+                    } else {
+                        login(Profile.getCurrentProfile());
+                    }
+                }
+
+                @Override
+                public void onCancel() {
+                    // App code
+                }
+
+                @Override
+                public void onError(FacebookException exception) {
+                    // App code
+                }
+            });
     }
 
+    public void setupProfileTracker() {
+            profileTracker = new ProfileTracker() {
+                @Override
+                protected void onCurrentProfileChanged(Profile profile, Profile profile2) {
+                    login(profile2);
+                }
+            };
+    }
+
+    public void login(Profile profile2) {
+        userId = profile2.getId();
+        String userName = Profile.getCurrentProfile().getName();
+        //create user
+        User = new UserDat(userId,userName);
+        checkAndAddUser();
+
+        if (loginButton != null) {
+            loginButton.setVisibility(View.INVISIBLE); //<- IMPORTANT
+        }
+        
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        intent.putExtra("User",(new Gson()).toJson(User));
+        startActivity(intent);
+        finish();//<- IMPORTANT
+    }
     /******************************************************************************
      *
      * Checks Database for Facebook user ID number
