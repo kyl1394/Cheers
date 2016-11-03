@@ -182,10 +182,12 @@
     <!-- Example settings for Notifications -->
     <string name="pref_header_notifications">Notifications</string>
 
-    <string name="pref_title_new_message_notifications">New message notifications</string>
+    <string name="pref_title_new_message_notifications">Check-in Reminders</string>
+    <string name="pref_summary_new_message_notifications">Get reminders while you\'re out drinking</string>
 
     <string name="pref_title_ringtone">Ringtone</string>
     <string name="pref_ringtone_silent">Silent</string>
 
     <string name="pref_title_vibrate">Vibrate</string>
+    <string name="pref_title_time_between_notifications">Time Between Notifications</string>
 </resources>
