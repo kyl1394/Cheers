@@ -2,6 +2,7 @@ package com.victoryroad.cheers;
 
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.location.Location;
 import android.net.Uri;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -29,7 +30,7 @@ import com.facebook.login.LoginResult;
 
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements LiveMapFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements LiveMapFragment.OnLocationUpdateListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -104,8 +105,8 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
-
+    public void onLocationUpdate(Location loc) {
+        //TODO implement what to do when the location changes
     }
 
     /**
