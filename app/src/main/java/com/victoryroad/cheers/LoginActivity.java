@@ -75,7 +75,6 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.On
                             String userName = Profile.getCurrentProfile().getName();
                             //create user
                             User = new UserDat(userId,userName);
-                            User.Checkins.put("blablaBla216548461","true");
                             checkAndAddUser();
 
                             loginButton.setVisibility(View.INVISIBLE); //<- IMPORTANT
