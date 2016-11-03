@@ -166,8 +166,8 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
     public void onMapReady(GoogleMap googleMap) {
         myMap = googleMap;
 
-        myMap.getUiSettings().setMyLocationButtonEnabled(false);
-
+        myMap.getUiSettings().setMyLocationButtonEnabled(true);
+        myMap.getUiSettings().setZoomControlsEnabled(true);
         try {
             if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling

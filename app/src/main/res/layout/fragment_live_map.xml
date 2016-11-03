@@ -1,7 +1,8 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.victoryroad.cheers.LiveMapFragment"
     android:id="@+id/map_container">
 
@@ -10,6 +11,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/mapView"
-        android:layout_margin="30dp"
-        android:layout_marginBottom="90dp"/>
-</FrameLayout>
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"/>
+    <!--android:layout_marginBottom="90dp" />
+    android:paddingBottom="5dp"/>-->
+</LinearLayout>
