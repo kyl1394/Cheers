@@ -3,6 +3,7 @@ package com.victoryroad.cheers;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -31,7 +32,7 @@ import static com.google.android.gms.wearable.DataMap.TAG;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link LiveMapFragment.OnFragmentInteractionListener} interface
+ * {@link LiveMapFragment.OnLocationUpdateListener} interface
  * to handle interaction events.
  * Use the {@link LiveMapFragment#newInstance} factory method to
  * create an instance of this fragment.
@@ -47,7 +48,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
     private String mParam1;
     private String mParam2;
 
-    private OnFragmentInteractionListener mListener;
+    private OnLocationUpdateListener mListener;
     GoogleMap myMap;
     MapView mMapView;
     private View rootView;
@@ -101,18 +102,17 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
         return rootView;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
+    public void onButtonPressed(Location loc) {
         if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+            mListener.onLocationUpdate(loc);
         }
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+        if (context instanceof OnLocationUpdateListener) {
+            mListener = (OnLocationUpdateListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -196,7 +196,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
                     myMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
                         @Override
                         public void onMyLocationChange(Location location) {
-                            //Do Nothing
+                            onButtonPressed(location);
                         }
                     });
                 }
@@ -238,9 +238,9 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener {
+    public interface OnLocationUpdateListener {
         // TODO: Update argument type and name
         // We aren't using this. When we add funcitonality to only load markers that the user can see, we will use this.
-        void onFragmentInteraction(Uri uri);
+        void onLocationUpdate(Location loc);
     }
 }

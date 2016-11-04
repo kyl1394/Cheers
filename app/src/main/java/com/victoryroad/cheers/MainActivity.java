@@ -1,13 +1,8 @@
 package com.victoryroad.cheers;
 
-import android.app.FragmentTransaction;
-import android.content.Context;
 import android.content.Intent;
-import android.location.LocationManager;
-import android.net.Uri;
+import android.location.Location;
 import android.support.design.widget.TabLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -22,20 +17,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.facebook.CallbackManager;
-import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
-import com.facebook.login.LoginResult;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.victoryroad.cheers.dataclasses.UserDat;
 
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements LiveMapFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements LiveMapFragment.OnLocationUpdateListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -117,8 +106,8 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
-
+    public void onLocationUpdate(Location loc) {
+        //TODO implement what to do when the location changes
     }
 
     /**
