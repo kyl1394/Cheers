@@ -1,5 +1,6 @@
 package com.victoryroad.cheers;
 
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
@@ -9,6 +10,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+
+import com.google.android.gms.location.LocationListener;
 
 import java.io.Console;
 

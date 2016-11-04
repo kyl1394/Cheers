@@ -1,7 +1,9 @@
 package com.victoryroad.cheers;
 
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.Intent;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -26,6 +28,10 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.Gson;
+import com.victoryroad.cheers.dataclasses.UserDat;
 
 import android.widget.TextView;
 
@@ -46,10 +52,16 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
      */
     private ViewPager mViewPager;
 
+    public static UserDat user;
+    public static LatLng latLng;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        String userGson = getIntent().getStringExtra("User");
+        user = (new Gson()).fromJson(userGson, UserDat.class);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -85,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
             case R.id.action_add_drink:
                 // Create new fragment and transaction
                 Intent addDrinkIntent = new Intent(getApplicationContext(), AddDrinkActivity.class);
+                addDrinkIntent.putExtra("UserID", user.getUserID());
                 startActivity(addDrinkIntent);
                 //finish(); // Possibly might cause issues?
                 break;

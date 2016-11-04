@@ -3,8 +3,10 @@ package com.victoryroad.cheers;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.text.format.Time;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +17,9 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.facebook.Profile;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -26,9 +31,11 @@ import com.victoryroad.cheers.dataclasses.CheckIn;
 import com.victoryroad.cheers.dataclasses.Drink;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
 
@@ -90,6 +97,31 @@ public class AlcoholCategoriesFragment extends Fragment {
         }
     }
 
+    private void createCheckin(Drink drink) {
+        Calendar cal = Calendar.getInstance();
+        CheckIn checkIn = new CheckIn(drink.getKey(), MainActivity.latLng, cal.getTime());
+        final String userId = MainActivity.user.getUserID();
+
+        Map<String, Object> JsonCheckin = new HashMap<>();
+        final Map<String, Boolean> checkinKeyEntry = new HashMap<>();
+        final String checkinKey = FirebaseDatabase.getInstance().getReference("Checkins").push().getKey();
+        JsonCheckin.put(checkinKey, checkIn);
+
+        FirebaseDatabase.getInstance().getReference("Checkins").updateChildren(JsonCheckin).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                checkinKeyEntry.put(checkinKey, true);
+                FirebaseDatabase.getInstance().getReference("Users").child(userId).child("Checkins").child(checkinKey).setValue(true);
+            }
+        });
+    }
+
+    private void addToDrinkList() {
+        for (String drink : categoryList.keySet()) {
+            mAdapter.add(drink);
+        }
+    }
+
     private void addToCategoryList() {
         for (String drink : categoryList.keySet()) {
             mAdapter.add(drink);
@@ -133,7 +165,7 @@ public class AlcoholCategoriesFragment extends Fragment {
                     }
                 }
 
-                addToCategoryList();
+                addToDrinkList();
                 Fragment fragment = AlcoholCategoriesFragment.newInstance(mParam1, true);
                 FragmentSwitcher.replaceFragmentWithAnimation(getFragmentManager(), fragment, "INNER_CATEGORY_FRAGMENT");
             }
@@ -224,6 +256,15 @@ public class AlcoholCategoriesFragment extends Fragment {
 
         mAdapter = new ArrayAdapter(getApplicationContext(), R.layout.list_item, list);
         listView.setAdapter(mAdapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+                // if is the final drink in the hierarchy
+                String item = listView.getItemAtPosition(position).toString();
+                createCheckin(drinkList.get(item));
+            }
+        });
 
         rootView.setFocusableInTouchMode(true);
         rootView.requestFocus();

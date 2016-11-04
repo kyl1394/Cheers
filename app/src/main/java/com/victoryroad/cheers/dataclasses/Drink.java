@@ -12,6 +12,10 @@ public class Drink implements Comparable<String> {
         return Name;
     }
 
+    public String getKey() {
+        return key;
+    }
+
     public Drink(String name, String drinkKey) {
         Name = name;
         key = drinkKey;
