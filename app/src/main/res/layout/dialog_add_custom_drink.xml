@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/bg"
+    android:orientation="vertical"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp">
+
+    <TextView
+        android:id="@+id/dialog_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="10dp"
+        android:text="Add Custom Drink"
+        android:textColor="@android:color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"/>
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="horizontal" >
+
+        <EditText
+            android:layout_width="106dp"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:editable="false"
+            android:text="Name:"
+            android:ems="10"
+            android:id="@+id/name_label"
+            android:maxLines="1"
+            android:labelFor="@+id/name_input"
+            android:textColor="@android:color/white"
+            android:clickable="false" />
+
+        <EditText
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:text="Custom Drink Name"
+            android:ems="10"
+            android:id="@+id/name_input"
+            android:layout_weight="0.85"
+            android:maxLines="1"
+            android:background="?android:attr/colorBackground"
+            android:layout_width="200dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="horizontal" >
+
+        <EditText
+            android:layout_width="106dp"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:editable="false"
+            android:text="Categories:"
+            android:ems="10"
+            android:id="@+id/categories_label"
+            android:maxLines="1"
+            android:labelFor="@+id/categories_selector"
+            android:textColor="@android:color/white"
+            android:clickable="false" />
+
+        <Spinner
+            android:layout_width="200dp"
+            android:id="@+id/categories_selector"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:layout_gravity="center_vertical"
+            android:background="@android:color/white"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="horizontal"
+        android:paddingTop="20dp"
+        android:paddingBottom="10dp">
+
+        <Button
+            android:text="Cancel"
+            android:layout_width="116dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/cancel_button"
+            android:layout_marginRight="30dp" />
+
+        <Button
+            android:text="Save"
+            android:layout_width="116dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/save_button"
+            android:layout_weight="1" />
+    </LinearLayout>
+</LinearLayout>

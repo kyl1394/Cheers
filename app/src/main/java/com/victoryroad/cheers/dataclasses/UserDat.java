@@ -1,4 +1,4 @@
-package com.victoryroad.cheers;
+package com.victoryroad.cheers.dataclasses;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import java.util.HashMap;
 public class UserDat {
     public String Name;
     public HashMap<String,String> Checkins;
-    private static String UserID;
+    private String UserID;
 
     public UserDat(String userId, String userName) {
         Name = userName;
@@ -18,7 +18,7 @@ public class UserDat {
         Checkins = new HashMap<>();
     }
 
-    public static String getUserID(){
+    public String getUserID(){
         return UserID;
     }
 

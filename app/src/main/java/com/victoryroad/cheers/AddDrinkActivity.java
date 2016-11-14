@@ -1,7 +1,9 @@
 package com.victoryroad.cheers;
 
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
@@ -9,6 +11,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
+
+import com.google.android.gms.location.LocationListener;
 
 import java.io.Console;
 
@@ -35,6 +40,20 @@ public class AddDrinkActivity
         getSupportFragmentManager().addOnBackStackChangedListener(this);
         //Handle when activity is recreated like on orientation Change
         shouldDisplayHomeUp();
+
+        setupCustomDrinkButton();
+    }
+
+    private void setupCustomDrinkButton() {
+        FloatingActionButton customDrinkButton = (FloatingActionButton) findViewById(R.id.add_custom_drink_button);
+
+        customDrinkButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AddCustomDrinkDialog customDrinkDialog = new AddCustomDrinkDialog(AddDrinkActivity.this);
+                customDrinkDialog.show();
+            }
+        });
     }
 
     public void shouldDisplayHomeUp(){

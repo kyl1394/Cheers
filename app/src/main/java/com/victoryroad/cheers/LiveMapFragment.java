@@ -8,6 +8,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.MainThread;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -186,10 +187,10 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
             @Override
             public void onMyLocationChange(Location location) {
 
-                LatLng loc = new LatLng(location.getLatitude(), location.getLongitude());
+                MainActivity.latLng = new LatLng(location.getLatitude(), location.getLongitude());
                 //mMarker = mMap.addMarker(new MarkerOptions().position(loc));
                 if(myMap != null) {
-                    myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, 16.0f));
+                    myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(MainActivity.latLng, 16.0f));
 
                     //Replace the Listener to do nothing
                     myMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
