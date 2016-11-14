@@ -263,6 +263,7 @@ public class AlcoholCategoriesFragment extends Fragment {
                 // if is the final drink in the hierarchy
                 String item = listView.getItemAtPosition(position).toString();
                 createCheckin(drinkList.get(item));
+                getActivity().finish();
             }
         });
 
