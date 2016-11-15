@@ -137,9 +137,9 @@
         <item>None</item>
     </string-array>
     <string-array name="pref_example_list_values">
-        <item>2</item>
         <item>1</item>
-        <item>0</item>
+        <item>2</item>
+        <item>3</item>
     </string-array>
 
     <!-- Example settings for Data & Sync -->
@@ -192,5 +192,6 @@
     <string name="pref_title_time_between_notifications">Time Between Notifications</string>
     <string name="pref_title_ring">Ring</string>
     <string name="pref_summary_time_between_notifications">(minutes)</string>
-    <string name="pref_title_custom_contact">Select Contact</string>
+    <string name="pref_title_custom_contact">Select Personal Contact</string>
+    <string name="pref_title_custom_set_home_location">Set Your Home Location</string>
 </resources>
