@@ -4,6 +4,7 @@ package com.victoryroad.cheers;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.media.Ringtone;
@@ -24,6 +25,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.net.URI;
 import java.util.List;
 
@@ -39,6 +42,7 @@ import java.util.List;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
+
     /**
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
@@ -125,6 +129,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
+        Settings.getSettings().setPreferenceManager(this.getPreferenceManager());
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -231,6 +236,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                         }
 
                         findPreference("custom_contact").setSummary(name);
+//                        findPreference("custom_contact").set
+
+                        SharedPreferences p = getPreferenceManager().getSharedPreferences();
+                        p.edit().putString(findPreference("custom_contact").getKey(), contactURI.toString());
 
                         Log.d("General Preferences", name);
                     }
@@ -308,4 +317,5 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             return super.onOptionsItemSelected(item);
         }
     }
+
 }
