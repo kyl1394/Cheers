@@ -6,6 +6,7 @@ import com.google.android.gms.games.internal.constants.TimeSpan;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DataSnapshot;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -19,6 +20,7 @@ public class CheckIn {
     public LatLng Location;
     public Date Time;
     public String Venue;
+    public ArrayList<String> Categories;
 
     public CheckIn(ArrayList<Comment> comments, String drinkKey, LatLng location, Date time, String venue) {
         Comments = comments;
@@ -39,5 +41,9 @@ public class CheckIn {
         DrinkKey = drinkKey;
         Location = location;
         Time = time;
+    }
+
+    public CheckIn() {
+
     }
 }

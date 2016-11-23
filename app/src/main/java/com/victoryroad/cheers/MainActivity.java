@@ -20,11 +20,13 @@ import android.view.ViewGroup;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
+import com.victoryroad.cheers.dataclasses.CheckIn;
 import com.victoryroad.cheers.dataclasses.UserDat;
+import com.victoryroad.cheers.dummy.DummyContent;
 
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements LiveMapFragment.OnLocationUpdateListener {
+public class MainActivity extends AppCompatActivity implements LiveMapFragment.OnLocationUpdateListener, MyFeedFragment.OnListFragmentInteractionListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -110,6 +112,11 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
         //TODO implement what to do when the location changes
     }
 
+    @Override
+    public void onListFragmentInteraction(CheckIn item) {
+
+    }
+
     /**
      * A placeholder fragment containing a simple view.
      */
@@ -159,6 +166,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
         public Fragment getItem(int position) {
             switch(position) {
                 case 1: return LiveMapFragment.newInstance("SecondFragment", "Instance 1");
+                case 2: return MyFeedFragment.newInstance("ThirdFragment", "Instance 2");
                 default: return PlaceholderFragment.newInstance(position + 1);
             }
         }
