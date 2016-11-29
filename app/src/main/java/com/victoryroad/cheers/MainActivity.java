@@ -19,12 +19,23 @@ import android.view.ViewGroup;
 
 import com.facebook.login.LoginManager;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
+import com.victoryroad.cheers.dataclasses.CheckIn;
 import com.victoryroad.cheers.dataclasses.UserDat;
+import com.victoryroad.cheers.dummy.DummyContent;
 
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements LiveMapFragment.OnLocationUpdateListener {
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+
+public class MainActivity extends AppCompatActivity implements LiveMapFragment.OnLocationUpdateListener, MyFeedFragment.OnListFragmentInteractionListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -40,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
+    private LiveMapFragment mLiveMapFragment;
 
     public static UserDat user;
     public static LatLng latLng;
@@ -48,6 +60,8 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mLiveMapFragment = LiveMapFragment.newInstance("SecondFragment");
 
         String userGson = getIntent().getStringExtra("User");
         user = (new Gson()).fromJson(userGson, UserDat.class);
@@ -64,6 +78,8 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+
+        getDrinksForCurrentUser();
     }
 
 
@@ -108,6 +124,75 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
     @Override
     public void onLocationUpdate(Location loc) {
         //TODO implement what to do when the location changes
+    }
+
+    @Override
+    public void onListFragmentInteraction(CheckIn item) {
+
+    }
+
+    private void getDrinksForCurrentUser() {
+        String userId = MainActivity.user.getUserID();
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("Checkins");
+
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Iterator iter = dataSnapshot.getChildren().iterator();
+                while (iter.hasNext()) {
+                    DataSnapshot child = (DataSnapshot) iter.next();
+                    final String checkinKey = child.getKey();
+
+                    DatabaseReference checkinRef = FirebaseDatabase.getInstance().getReference("Checkins").child(checkinKey);
+                    checkinRef.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(final DataSnapshot checkinDataSnapshot) {
+//                            CheckIn in = dataSnapshot.child(checkinKey).getValue(CheckIn.class);
+//                            CheckIn in = (new Gson()).fromJson(dataSnapshot.child(checkinKey), CheckIn.class);
+                            String drinkKey = checkinDataSnapshot.child("DrinkKey").getValue(String.class);
+
+                            FirebaseDatabase.getInstance().getReference("Drinks").child(drinkKey).addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    String drinkName = dataSnapshot.child("Name").getValue(String.class);
+                                    ArrayList<String> categories = new ArrayList<>();
+
+                                    for (DataSnapshot category : dataSnapshot.child("Categories").getChildren()) {
+                                        categories.add(category.getKey());
+                                    }
+
+                                    double lat = checkinDataSnapshot.child("Location").child("latitude").getValue(double.class);
+                                    double lng = checkinDataSnapshot.child("Location").child("longitude").getValue(double.class);
+                                    LatLng location = new LatLng(lat, lng);
+                                    mLiveMapFragment.addMarker(drinkName, lng, lat);
+                                    Date time = checkinDataSnapshot.child("Time").getValue(Date.class);
+//                            Date time = (new Gson()).fromJson(timeString, Date.class);
+
+                                    CheckIn checkin = new CheckIn(drinkName, location, time);
+                                    checkin.Categories = categories;
+                                    MyFeedFragment.CheckIns.add(checkin);
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     /**
@@ -158,7 +243,9 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
         @Override
         public Fragment getItem(int position) {
             switch(position) {
-                case 1: return LiveMapFragment.newInstance("SecondFragment", "Instance 1");
+                case 1:
+                    return mLiveMapFragment;
+                case 2: return MyFeedFragment.newInstance("ThirdFragment", "Instance 2");
                 default: return PlaceholderFragment.newInstance(position + 1);
             }
         }
