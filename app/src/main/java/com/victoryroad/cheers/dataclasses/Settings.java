@@ -1,4 +1,4 @@
-package com.victoryroad.cheers;
+package com.victoryroad.cheers.dataclasses;
 
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +17,11 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
+import static com.victoryroad.cheers.dataclasses.Settings.DesignatedDriver.CONTACT;
+import static com.victoryroad.cheers.dataclasses.Settings.DesignatedDriver.NONE;
+import static com.victoryroad.cheers.dataclasses.Settings.DesignatedDriver.NULL;
+import static com.victoryroad.cheers.dataclasses.Settings.DesignatedDriver.UBER;
+
 
 public class Settings {
     //First value is how long to have vibration pattern off, then how long to have it on, and so on for the length of the array
@@ -28,6 +33,8 @@ public class Settings {
     private MediaPlayer mMediaPlayer;
 
     private static Settings mSetting = new Settings();
+
+    public enum DesignatedDriver {NULL, UBER, CONTACT, NONE};
 
     private Settings() {
         p = new SharedPreferences() {
@@ -99,11 +106,19 @@ public class Settings {
         return mSetting;
     }
 
+    public void makeCall(Context context) {
+
+    }
+
+    public void makeCallWithUber(Context context) {
+        //TODO
+    }
+
     public void makeCallWithContact(Context context) {
         if(this.getContact() == null)
             return;
         Intent intent = new Intent(Intent.ACTION_DIAL);
-        intent.setData(this.getContact());
+        intent.setData(Uri.parse("tel:" + this.getContact().number));
         context.startActivity(intent);
     }
 
@@ -145,13 +160,34 @@ public class Settings {
         p = PreferenceManager.getDefaultSharedPreferences(prefManager);
     }
 
-    public Uri getContact() {
+    public DesignatedDriver getDesignatedDriver() {
         updateP();
-        String uri = p.getString("custom_contact", null);
-        if(uri == null)
+
+        String result = p.getString("example_list", "0");
+
+        DesignatedDriver dd = NULL;
+
+        switch(Integer.parseInt(result)) {
+            case 1:
+                dd = UBER;
+                break;
+            case 2:
+                dd = CONTACT;
+                break;
+            case 3:
+                dd = NONE;
+        }
+
+        return dd;
+    }
+
+    public Contact getContact() {
+        updateP();
+        String contact = p.getString("custom_contact", null);
+        if(contact == null)
             return null;
 
-        return Uri.parse(uri);
+        return Contact.deserialize(contact);
     }
 
     public LatLng getHomeLocation() {
@@ -191,4 +227,6 @@ public class Settings {
         Log.w("Settings", "wantsVibrate: " + r);
         return r;
     }
+
+
 }

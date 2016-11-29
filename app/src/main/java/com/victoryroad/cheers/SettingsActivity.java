@@ -27,6 +27,8 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.victoryroad.cheers.dataclasses.Contact;
+import com.victoryroad.cheers.dataclasses.Settings;
 
 import java.net.URI;
 import java.util.List;
@@ -134,7 +136,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         Settings s = Settings.getSettingsAndSetPreferenceContext(this);
 
        // Toast.makeText(this, "Contact: ", Toast.LENGTH_LONG).show();
-        //s.makeCallWithContact(this);
+        s.makeCallWithContact(this);
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -230,6 +232,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             switch(requestCode){
                 case PICK_CONTACT:
                     if(resultCode == RESULT_OK) {
+                        Contact contact = new Contact();
                         String name = "";
                         String contactId = "";
                         String hasNumber = "";
@@ -244,7 +247,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                         }
 
                         if(hasNumber.equals("1")) {
-                            name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+                            contact.name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
                             contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
                             Cursor phones = getActivity().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID +" = "+ contactId, null, null);
 
@@ -253,17 +256,16 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                             }
 
                             if(phones != null && phones.moveToFirst()) {
-                                number = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                                contact.number = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
                                 phones.close();
                             }
 
-                            findPreference("custom_contact").setSummary(name + "-" + number);
-//                        findPreference("custom_contact").set
+                            findPreference("custom_contact").setSummary(contact.toString());
 
                             SharedPreferences p = getPreferenceManager().getSharedPreferences();
-                            p.edit().putString(findPreference("custom_contact").getKey(), "tel:" + number).apply();
+                            p.edit().putString(findPreference("custom_contact").getKey(), contact.serialize()).apply();
 
-                            Log.d("General Preferences", name);
+                            Log.d("General Preferences", contact.toString());
                             cursor.close();
                         }
                     }
