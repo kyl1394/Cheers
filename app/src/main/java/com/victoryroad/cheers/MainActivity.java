@@ -19,12 +19,21 @@ import android.view.ViewGroup;
 
 import com.facebook.login.LoginManager;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.victoryroad.cheers.dataclasses.CheckIn;
 import com.victoryroad.cheers.dataclasses.UserDat;
 import com.victoryroad.cheers.dummy.DummyContent;
 
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity implements LiveMapFragment.OnLocationUpdateListener, MyFeedFragment.OnListFragmentInteractionListener {
 
@@ -66,6 +75,8 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+
+        getDrinksForCurrentUser();
     }
 
 
@@ -115,6 +126,71 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
     @Override
     public void onListFragmentInteraction(CheckIn item) {
 
+    }
+
+    private void getDrinksForCurrentUser() {
+        String userId = MainActivity.user.getUserID();
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("Checkins");
+
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Iterator iter = dataSnapshot.getChildren().iterator();
+                while (iter.hasNext()) {
+                    DataSnapshot child = (DataSnapshot) iter.next();
+                    final String checkinKey = child.getKey();
+
+                    DatabaseReference checkinRef = FirebaseDatabase.getInstance().getReference("Checkins").child(checkinKey);
+                    checkinRef.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(final DataSnapshot checkinDataSnapshot) {
+//                            CheckIn in = dataSnapshot.child(checkinKey).getValue(CheckIn.class);
+//                            CheckIn in = (new Gson()).fromJson(dataSnapshot.child(checkinKey), CheckIn.class);
+                            String drinkKey = checkinDataSnapshot.child("DrinkKey").getValue(String.class);
+
+                            FirebaseDatabase.getInstance().getReference("Drinks").child(drinkKey).addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    String drinkName = dataSnapshot.child("Name").getValue(String.class);
+                                    ArrayList<String> categories = new ArrayList<>();
+
+                                    for (DataSnapshot category : dataSnapshot.child("Categories").getChildren()) {
+                                        categories.add(category.getKey());
+                                    }
+
+                                    double lat = checkinDataSnapshot.child("Location").child("latitude").getValue(double.class);
+                                    double lng = checkinDataSnapshot.child("Location").child("longitude").getValue(double.class);
+                                    LatLng location = new LatLng(lat, lng);
+                                    Date time = checkinDataSnapshot.child("Time").getValue(Date.class);
+//                            Date time = (new Gson()).fromJson(timeString, Date.class);
+
+                                    CheckIn checkin = new CheckIn(drinkName, location, time);
+                                    checkin.Categories = categories;
+                                    MyFeedFragment.CheckIns.add(checkin);
+
+//                                    MyFeedFragment.mAdapter.notifyDataSetChanged();
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     /**
