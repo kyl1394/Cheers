@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -22,7 +23,7 @@ public class Settings {
     private final long[] vibrationPattern = new long[] {0, 500, 200, 500};
 
     private SharedPreferences p;
-    private PreferenceManager prefManager;
+    private Context prefManager;
 
     private MediaPlayer mMediaPlayer;
 
@@ -86,17 +87,21 @@ public class Settings {
             public void unregisterOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener) {
 
             }
-    }}
+        };
+    }
 
     public static Settings getSettings() {
         return mSetting;
     }
 
-    public static void setPreferenceManager(PreferenceManager m) {
-        mSetting.setManager(m);
+    public static Settings getSettingsAndSetPreferenceContext(Context prefContext) {
+        mSetting.setManager(prefContext);
+        return mSetting;
     }
 
     public void makeCallWithContact(Context context) {
+        if(this.getContact() == null)
+            return;
         Intent intent = new Intent(Intent.ACTION_DIAL);
         intent.setData(this.getContact());
         context.startActivity(intent);
@@ -110,8 +115,8 @@ public class Settings {
                 mMediaPlayer.setDataSource(context, this.getRingtone());
                 final AudioManager audioManager = (AudioManager) context
                         .getSystemService(Context.AUDIO_SERVICE);
-                if (audioManager.getStreamVolume(AudioManager.STREAM_ALARM) != 0) {
-                    mMediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
+                if (audioManager.getStreamVolume(AudioManager.STREAM_RING) != 0) {
+                    mMediaPlayer.setAudioStreamType(AudioManager.STREAM_RING);
                     mMediaPlayer.prepare();
                     mMediaPlayer.start();
                 }
@@ -129,14 +134,15 @@ public class Settings {
         }
     }
 
-    private void setManager(PreferenceManager manager) {
-        prefManager = manager;
+    private void setManager(Context prefManager) {
+        Log.w("Settings", prefManager.toString());
+        this.prefManager = prefManager;
     }
 
     private void updateP() {
         if(prefManager == null)
             return;
-        p = prefManager.getSharedPreferences();
+        p = PreferenceManager.getDefaultSharedPreferences(prefManager);
     }
 
     public Uri getContact() {
@@ -155,26 +161,34 @@ public class Settings {
 
     public boolean wantsReminders() {
         updateP();
-        return p.getBoolean("notifications_new_message", false);
+        boolean r = p.getBoolean("notifications_new_message", false);
+        Log.w("Settings", "wantsReminders: " + r);
+        return r;
     }
 
     public int timeBetweenNotifications() {
         updateP();
-        return p.getInt("time_between_notifications", -1);
+        return Integer.parseInt(p.getString("time_between_notifications", "-1"));
     }
 
     public boolean wantsRing() {
         updateP();
-        return p.getBoolean("notifications_new_message_ring", false);
+
+        boolean r = p.getBoolean("notifications_new_message_ring", false);
+        Log.w("Settings", "wantsRing: " + r);
+        return r;
     }
 
     public Uri getRingtone() {
         updateP();
-        return Uri.parse(p.getString("notifications_new_message_ring", "DEFAULT_SOUND"));
+        return Uri.parse(p.getString("notifications_new_message_ringtone", "DEFAULT_SOUND"));
     }
 
     public boolean wantsVibrate() {
         updateP();
-        return p.getBoolean("notifications_new_message_ringtone", false);
+
+        boolean r = p.getBoolean("notifications_new_message_vibrate", false);
+        Log.w("Settings", "wantsVibrate: " + r);
+        return r;
     }
 }

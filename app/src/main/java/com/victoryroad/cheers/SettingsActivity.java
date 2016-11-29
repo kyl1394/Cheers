@@ -24,6 +24,7 @@ import android.preference.RingtonePreference;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -129,7 +130,11 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
-        Settings.getSettings().setPreferenceManager(this.getPreferenceManager());
+
+        Settings s = Settings.getSettingsAndSetPreferenceContext(this);
+
+       // Toast.makeText(this, "Contact: ", Toast.LENGTH_LONG).show();
+        //s.makeCallWithContact(this);
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -226,22 +231,41 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 case PICK_CONTACT:
                     if(resultCode == RESULT_OK) {
                         String name = "";
+                        String contactId = "";
+                        String hasNumber = "";
+                        String number = "";
 
                         Uri contactURI = data.getData();
 
                         Cursor cursor = getActivity().getContentResolver().query(contactURI, null, null, null, null, null);
 
                         if(cursor.moveToFirst()) {
-                            name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+                            hasNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER));
                         }
 
-                        findPreference("custom_contact").setSummary(name);
+                        if(hasNumber.equals("1")) {
+                            name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+                            contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+                            Cursor phones = getActivity().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID +" = "+ contactId, null, null);
+
+                            if (phones == null) {
+                                Log.w("SettingsActivity", "No Number Found");
+                            }
+
+                            if(phones != null && phones.moveToFirst()) {
+                                number = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                                phones.close();
+                            }
+
+                            findPreference("custom_contact").setSummary(name + "-" + number);
 //                        findPreference("custom_contact").set
 
-                        SharedPreferences p = getPreferenceManager().getSharedPreferences();
-                        p.edit().putString(findPreference("custom_contact").getKey(), contactURI.toString());
+                            SharedPreferences p = getPreferenceManager().getSharedPreferences();
+                            p.edit().putString(findPreference("custom_contact").getKey(), "tel:" + number).apply();
 
-                        Log.d("General Preferences", name);
+                            Log.d("General Preferences", name);
+                            cursor.close();
+                        }
                     }
                     break;
             }
