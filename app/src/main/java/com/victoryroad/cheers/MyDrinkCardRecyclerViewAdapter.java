@@ -2,6 +2,7 @@ package com.victoryroad.cheers;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,9 +10,16 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.facebook.AccessToken;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
 import com.facebook.Profile;
+import com.facebook.login.widget.ProfilePictureView;
 import com.victoryroad.cheers.dataclasses.CheckIn;
 import com.victoryroad.cheers.dummy.DummyContent.DummyItem;
+
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -20,6 +28,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.logging.Handler;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link DummyItem} and makes a call to the
@@ -56,15 +65,8 @@ public class MyDrinkCardRecyclerViewAdapter extends RecyclerView.Adapter<MyDrink
         holder.mDate.setText(sdf.format(mValues.get(position).Time));
         holder.mName.setText(profile.getName());
 
-//        try {
-//            url = new URL(Profile.getCurrentProfile().getProfilePictureUri(86, 86).toString());
-//            Bitmap bitmap = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-//            holder.mProfilePic.setImageBitmap(bitmap);
-//        } catch (MalformedURLException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        holder.mProfilePic.setProfileId(Profile.getCurrentProfile().getId());
+
         //holder.mContentView.setText(mValues.get(position).content);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
@@ -90,7 +92,7 @@ public class MyDrinkCardRecyclerViewAdapter extends RecyclerView.Adapter<MyDrink
         public final TextView mDate;
         public final TextView mDrinkName;
         public final TextView mCategories;
-        public final ImageView mProfilePic;
+        public final ProfilePictureView mProfilePic;
         public final ImageView mDrinkPic;
         public CheckIn mItem;
 
@@ -101,7 +103,7 @@ public class MyDrinkCardRecyclerViewAdapter extends RecyclerView.Adapter<MyDrink
             mDate = (TextView) view.findViewById(R.id.date_text);
             mDrinkName = (TextView) view.findViewById(R.id.drink_text);
             mCategories = (TextView) view.findViewById(R.id.category_text);
-            mProfilePic = (ImageView) view.findViewById(R.id.profile_pic);
+            mProfilePic = (ProfilePictureView) view.findViewById(R.id.profile_pic);
             mDrinkPic = (ImageView) view.findViewById(R.id.drink_pic);
         }
 
