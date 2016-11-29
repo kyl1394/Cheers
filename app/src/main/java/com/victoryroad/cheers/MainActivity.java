@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
+    private LiveMapFragment mLiveMapFragment;
 
     public static UserDat user;
     public static LatLng latLng;
@@ -59,6 +60,8 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mLiveMapFragment = LiveMapFragment.newInstance("SecondFragment");
 
         String userGson = getIntent().getStringExtra("User");
         user = (new Gson()).fromJson(userGson, UserDat.class);
@@ -161,14 +164,13 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
                                     double lat = checkinDataSnapshot.child("Location").child("latitude").getValue(double.class);
                                     double lng = checkinDataSnapshot.child("Location").child("longitude").getValue(double.class);
                                     LatLng location = new LatLng(lat, lng);
+                                    mLiveMapFragment.addMarker(drinkName, lng, lat);
                                     Date time = checkinDataSnapshot.child("Time").getValue(Date.class);
 //                            Date time = (new Gson()).fromJson(timeString, Date.class);
 
                                     CheckIn checkin = new CheckIn(drinkName, location, time);
                                     checkin.Categories = categories;
                                     MyFeedFragment.CheckIns.add(checkin);
-
-//                                    MyFeedFragment.mAdapter.notifyDataSetChanged();
                                 }
 
                                 @Override
@@ -241,7 +243,8 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
         @Override
         public Fragment getItem(int position) {
             switch(position) {
-                case 1: return LiveMapFragment.newInstance("SecondFragment", "Instance 1");
+                case 1:
+                    return mLiveMapFragment;
                 case 2: return MyFeedFragment.newInstance("ThirdFragment", "Instance 2");
                 default: return PlaceholderFragment.newInstance(position + 1);
             }
