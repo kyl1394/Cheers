@@ -226,7 +226,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
 
     //TODO use this function
     public void addMarker(String title, double longitude, double latitude) {
-        myMap.addMarker(new MarkerOptions().title(title).position(new LatLng(longitude, latitude)));
+        myMap.addMarker(new MarkerOptions().title(title).position(new LatLng(latitude, longitude)));
     }
 
     /**
