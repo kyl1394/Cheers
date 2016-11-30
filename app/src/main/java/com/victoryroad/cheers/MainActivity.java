@@ -112,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
 
             case R.id.action_logout_button:
                 LoginManager.getInstance().logOut();
+                MyFeedFragment.CheckIns.clear();
                 Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                 startActivity(intent);
                 finish();
