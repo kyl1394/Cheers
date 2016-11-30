@@ -59,7 +59,7 @@ public class MyDrinkCardRecyclerViewAdapter extends RecyclerView.Adapter<MyDrink
         holder.mItem = mValues.get(position);
         holder.mDrinkName.setText(mValues.get(position).DrinkKey);
         String categoriesString = mValues.get(position).Categories.toString();
-        holder.mCategories.append("\n" + categoriesString.substring(1, categoriesString.length() - 1));
+        holder.mCategories.setText("Categories:\n" + categoriesString.substring(1, categoriesString.length() - 1));
         DateFormat sdf = SimpleDateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
 
         holder.mDate.setText(sdf.format(mValues.get(position).Time));

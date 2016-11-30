@@ -39,9 +39,9 @@ public class MyFeedFragment extends Fragment {
     private static final String ARG_COLUMN_COUNT = "column-count";
     // TODO: Customize parameters
     private int mColumnCount = 1;
-    private OnListFragmentInteractionListener mListener;
-    public static MyDrinkCardRecyclerViewAdapter mAdapter;
-    public static List<CheckIn> CheckIns = new ArrayList<>();
+    public OnListFragmentInteractionListener mListener;
+    public MyDrinkCardRecyclerViewAdapter mAdapter;
+    public List<CheckIn> CheckIns = new ArrayList<>();
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the

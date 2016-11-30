@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
      */
     private ViewPager mViewPager;
     private LiveMapFragment mLiveMapFragment;
+    private MyFeedFragment mMyFeedFragment;
 
     public static UserDat user;
     public static LatLng latLng;
@@ -62,6 +63,8 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
         setContentView(R.layout.activity_main);
 
         mLiveMapFragment = LiveMapFragment.newInstance("SecondFragment");
+        mMyFeedFragment = MyFeedFragment.newInstance("ThirdFragment", "Param 2");
+        mMyFeedFragment.mAdapter = new MyDrinkCardRecyclerViewAdapter(mMyFeedFragment.CheckIns, mMyFeedFragment.mListener);
 
         String userGson = getIntent().getStringExtra("User");
         user = (new Gson()).fromJson(userGson, UserDat.class);
@@ -112,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
 
             case R.id.action_logout_button:
                 LoginManager.getInstance().logOut();
-                MyFeedFragment.CheckIns.clear();
+//                mMyFeedFragment.CheckIns.clear();
                 Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                 startActivity(intent);
                 finish();
@@ -171,7 +174,8 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
 
                                     CheckIn checkin = new CheckIn(drinkName, location, time);
                                     checkin.Categories = categories;
-                                    MyFeedFragment.CheckIns.add(checkin);
+                                    mMyFeedFragment.CheckIns.add(checkin);
+                                    mMyFeedFragment.mAdapter.notifyDataSetChanged();
                                 }
 
                                 @Override
@@ -246,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
             switch(position) {
                 case 1:
                     return mLiveMapFragment;
-                case 2: return MyFeedFragment.newInstance("ThirdFragment", "Instance 2");
+                case 2: return mMyFeedFragment;
                 default: return PlaceholderFragment.newInstance(position + 1);
             }
         }
