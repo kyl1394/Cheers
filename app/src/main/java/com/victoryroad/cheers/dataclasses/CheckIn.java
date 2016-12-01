@@ -21,6 +21,8 @@ public class CheckIn {
     public Date Time;
     public String Venue;
     public ArrayList<String> Categories;
+    public String id;
+    public String userName;
 
     public CheckIn(ArrayList<Comment> comments, String drinkKey, LatLng location, Date time, String venue) {
         Comments = comments;

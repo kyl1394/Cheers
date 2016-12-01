@@ -36,6 +36,9 @@ import com.victoryroad.cheers.dummy.DummyContent;
 
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -222,70 +225,80 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
                 HttpMethod.GET,
                 new GraphRequest.Callback() {
                     public void onCompleted(GraphResponse response) {
-                        response.getJSONArray();
+                        try {
+                            JSONArray arr = response.getJSONObject().getJSONArray("data");
+                            for (int i = 0; i < arr.length(); i++) {
+                                final String id = arr.getJSONObject(i).get("id").toString();
+                                final String name = arr.getJSONObject(i).get("name").toString();
+                                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(id).child("Checkins");
+
+                                ref.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        for (DataSnapshot child : dataSnapshot.getChildren()) {
+                                            final String checkinKey = child.getKey();
+
+                                            DatabaseReference checkinRef = FirebaseDatabase.getInstance().getReference("Checkins").child(checkinKey);
+                                            checkinRef.addValueEventListener(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(final DataSnapshot checkinDataSnapshot) {
+//                            CheckIn in = dataSnapshot.child(checkinKey).getValue(CheckIn.class);
+//                            CheckIn in = (new Gson()).fromJson(dataSnapshot.child(checkinKey), CheckIn.class);
+                                                    String drinkKey = checkinDataSnapshot.child("DrinkKey").getValue(String.class);
+
+                                                    FirebaseDatabase.getInstance().getReference("Drinks").child(drinkKey).addValueEventListener(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                                            String drinkName = dataSnapshot.child("Name").getValue(String.class);
+                                                            ArrayList<String> categories = new ArrayList<>();
+
+                                                            for (DataSnapshot category : dataSnapshot.child("Categories").getChildren()) {
+                                                                categories.add(category.getKey());
+                                                            }
+
+                                                            double lat = checkinDataSnapshot.child("Location").child("latitude").getValue(double.class);
+                                                            double lng = checkinDataSnapshot.child("Location").child("longitude").getValue(double.class);
+                                                            LatLng location = new LatLng(lat, lng);
+                                                            mLiveMapFragment.addMarker(drinkName, lng, lat);
+                                                            Date time = checkinDataSnapshot.child("Time").getValue(Date.class);
+//                            Date time = (new Gson()).fromJson(timeString, Date.class);
+
+                                                            CheckIn checkin = new CheckIn(drinkName, location, time);
+                                                            checkin.Categories = categories;
+                                                            checkin.id = id;
+                                                            checkin.userName = name;
+                                                            mDrinkFeedFragment.CheckIns.add(checkin);
+                                                            mDrinkFeedFragment.mAdapter.notifyDataSetChanged();
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(DatabaseError databaseError) {
+
+                                                        }
+                                                    });
+                                                }
+
+                                                @Override
+                                                public void onCancelled(DatabaseError databaseError) {
+
+                                                }
+                                            });
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
                     }
                 }
         ).executeAsync();
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("Checkins");
-
-        ref.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Iterator iter = dataSnapshot.getChildren().iterator();
-                while (iter.hasNext()) {
-                    DataSnapshot child = (DataSnapshot) iter.next();
-                    final String checkinKey = child.getKey();
-
-                    DatabaseReference checkinRef = FirebaseDatabase.getInstance().getReference("Checkins").child(checkinKey);
-                    checkinRef.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(final DataSnapshot checkinDataSnapshot) {
-//                            CheckIn in = dataSnapshot.child(checkinKey).getValue(CheckIn.class);
-//                            CheckIn in = (new Gson()).fromJson(dataSnapshot.child(checkinKey), CheckIn.class);
-                            String drinkKey = checkinDataSnapshot.child("DrinkKey").getValue(String.class);
-
-                            FirebaseDatabase.getInstance().getReference("Drinks").child(drinkKey).addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    String drinkName = dataSnapshot.child("Name").getValue(String.class);
-                                    ArrayList<String> categories = new ArrayList<>();
-
-                                    for (DataSnapshot category : dataSnapshot.child("Categories").getChildren()) {
-                                        categories.add(category.getKey());
-                                    }
-
-                                    double lat = checkinDataSnapshot.child("Location").child("latitude").getValue(double.class);
-                                    double lng = checkinDataSnapshot.child("Location").child("longitude").getValue(double.class);
-                                    LatLng location = new LatLng(lat, lng);
-                                    mLiveMapFragment.addMarker(drinkName, lng, lat);
-                                    Date time = checkinDataSnapshot.child("Time").getValue(Date.class);
-//                            Date time = (new Gson()).fromJson(timeString, Date.class);
-
-                                    CheckIn checkin = new CheckIn(drinkName, location, time);
-                                    checkin.Categories = categories;
-                                    mMyFeedFragment.CheckIns.add(checkin);
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
     }
 
     /**
