@@ -20,6 +20,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -200,7 +202,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
 
         redrawHomeLocation();
 
-
+        addMarker("Test", 42.0283, -93.648);
     }
 
     /**
@@ -211,6 +213,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
 
         if(homeLocation != null && myMap != null) {
             if(home != null) {
+                this.removeMarker(homeLocation);
                 home.remove();
             }
             int circleColor = ContextCompat.getColor(this.getContext(), R.color.colorAccent);
@@ -218,8 +221,6 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
 
             int fill = (alpha<<24) | (0x00FFFFFF&circleColor);
             int border = (((int)(alpha * 1.2))<<24) | (0x00FFFFFF&circleColor);
-
-            Log.w("LiveMap", ":" + Integer.toHexString(circleColor));
 
             //If home location set, draw it on the map
             home = myMap.addCircle(new CircleOptions()
@@ -229,9 +230,8 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
                     .strokeWidth(Settings.getSettingsFor(this.getContext()).getHomeLocationRadius() / 10)
                     .strokeColor(border)
                     .clickable(true));
-            //Don't know what to do with it. Probably nothing
-            Toast.makeText(this.getContext(), "Circle drawn at " + homeLocation.toString(), Toast.LENGTH_LONG).show();
 
+            addMarker("Home", homeLocation, BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
         }
     }
 
@@ -249,18 +249,41 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     /**
+     *
      * Creates a new marker to put on the map
      *
      * @param title the title for the marker
      * @param longitude the longitude where the marker is at
      * @param latitude the latitude the marker is at
      */
-    public void addMarker(String title, double latitude, double longitude) {
+    @Deprecated
+    public void addMarker(String title, double longitude, double latitude) {
         markers.add(
                 myMap.addMarker(
                         new MarkerOptions()
                                 .title(title)
                                 .position(new LatLng(latitude, longitude))
+                )
+        );
+    }
+
+    public void addMarker(String title, LatLng location) {
+        markers.add(
+                myMap.addMarker(
+                        new MarkerOptions()
+                                .title(title)
+                                .position(location)
+                )
+        );
+    }
+
+    public void addMarker(String title, LatLng location, BitmapDescriptor icon) {
+        markers.add(
+                myMap.addMarker(
+                        new MarkerOptions()
+                                .title(title)
+                                .position(location)
+                                .icon(icon)
                 )
         );
     }
