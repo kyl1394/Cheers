@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
 
     @Override
     public void onLocationUpdate(Location loc) {
-        //TODO implement what to do when the location changes
+        MainActivity.latLng = new LatLng(loc.getLatitude(), loc.getLongitude());
     }
 
     /**
@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
         @Override
         public Fragment getItem(int position) {
             switch(position) {
-                case 1: return LiveMapFragment.newInstance("SecondFragment", "Instance 1");
+                case 1: return LiveMapFragment.newInstance();
                 default: return PlaceholderFragment.newInstance(position + 1);
             }
         }

@@ -10,6 +10,7 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -35,6 +36,7 @@ public class Settings {
     private static Settings mSetting = new Settings();
 
     public enum DesignatedDriver {NULL, UBER, CONTACT, NONE};
+
 
     private Settings() {
         p = new SharedPreferences() {
@@ -107,15 +109,28 @@ public class Settings {
     }
 
     public void makeCall(Context context) {
-
+        switch(this.getDesignatedDriver()) {
+            case UBER:
+                makeCallWithUber(context);
+                break;
+            case CONTACT:
+                makeCallWithContact(context);
+                break;
+            case NONE:
+                Toast.makeText(context, "No designated driver set", Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                Toast.makeText(context, "ERROR: UNKNOWN DD STATE", Toast.LENGTH_LONG).show();
+                break;
+        }
     }
 
-    public void makeCallWithUber(Context context) {
+    private void makeCallWithUber(Context context) {
         //TODO
     }
 
-    public void makeCallWithContact(Context context) {
-        if(this.getContact() == null)
+    private void makeCallWithContact(Context context) {
+        if(this.getContact() == null || this.getDesignatedDriver() != DesignatedDriver.CONTACT)
             return;
         Intent intent = new Intent(Intent.ACTION_DIAL);
         intent.setData(Uri.parse("tel:" + this.getContact().number));
@@ -165,17 +180,17 @@ public class Settings {
 
         String result = p.getString("example_list", "0");
 
-        DesignatedDriver dd = NULL;
+        DesignatedDriver dd = DesignatedDriver.NULL;
 
         switch(Integer.parseInt(result)) {
             case 1:
-                dd = UBER;
+                dd = DesignatedDriver.UBER;
                 break;
             case 2:
-                dd = CONTACT;
+                dd = DesignatedDriver.CONTACT;
                 break;
             case 3:
-                dd = NONE;
+                dd = DesignatedDriver.NONE;
         }
 
         return dd;
@@ -192,7 +207,16 @@ public class Settings {
 
     public LatLng getHomeLocation() {
         updateP();
-        return null;
+
+        String loc = p.getString("custom_set_home_location", "");
+
+        if(loc.equals(""))
+            return null;
+
+        double lat = Double.parseDouble(loc.substring(0, loc.indexOf(',')));
+        double lng = Double.parseDouble(loc.substring(loc.indexOf(',')+1));
+
+        return new LatLng(lat, lng);
     }
 
     public boolean wantsReminders() {

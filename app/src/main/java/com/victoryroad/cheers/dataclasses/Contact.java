@@ -35,8 +35,8 @@ public class Contact {
         if(contact == null)
             return null;
 
-        String name = "";
-        String num = "";
+        String name;
+        String num;
 
         int sepIndex = contact.indexOf(SEPARATOR);
 

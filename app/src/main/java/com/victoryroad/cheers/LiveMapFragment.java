@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,11 +12,13 @@ import android.os.Handler;
 import android.support.annotation.MainThread;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -23,8 +26,11 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.victoryroad.cheers.dataclasses.Settings;
 
 import static com.google.android.gms.wearable.DataMap.TAG;
 
@@ -38,10 +44,6 @@ import static com.google.android.gms.wearable.DataMap.TAG;
  * create an instance of this fragment.
  */
 public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
     private static final int LOCATION_REQUEST = 5;
 
     // TODO: Rename and change types of parameters
@@ -64,17 +66,14 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment LiveMapFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static LiveMapFragment newInstance(String param1, String param2) {
+    public static LiveMapFragment newInstance() {
         LiveMapFragment fragment = new LiveMapFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
+        //Add no args. None needed
         return fragment;
     }
 
@@ -82,8 +81,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            //Do nothing
         }
     }
 
@@ -152,6 +150,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onResume() {
         super.onResume();
+        redrawHomeLocation();
         mMapView.onResume();
     }
 
@@ -187,10 +186,10 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
             @Override
             public void onMyLocationChange(Location location) {
 
-                MainActivity.latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                //MainActivity.latLng = new LatLng(location.getLatitude(), location.getLongitude());
                 //mMarker = mMap.addMarker(new MarkerOptions().position(loc));
                 if(myMap != null) {
-                    myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(MainActivity.latLng, 16.0f));
+                    myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 16.0f));
 
                     //Replace the Listener to do nothing
                     myMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
@@ -200,15 +199,40 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
                         }
                     });
                 }
+
+                mListener.onLocationUpdate(location);
             }
         };
 
         myMap.setOnMyLocationChangeListener(listener);
 
+        redrawHomeLocation();
+    }
 
-        Handler handler = new Handler();
+    private void redrawHomeLocation() {
+        LatLng homeLocation = Settings.getSettingsAndSetPreferenceContext(this.getContext()).getHomeLocation();
 
-        //handler.postDelayed();
+        if(homeLocation != null && myMap != null) {
+            int circleColor = ContextCompat.getColor(this.getContext(), R.color.colorAccent);
+            int alpha = 64; // out of 256
+
+            int fill = (alpha<<24) | (0x00FFFFFF&circleColor);
+            int border = (((int)(alpha * 1.2))<<24) | (0x00FFFFFF&circleColor);
+
+            Log.w("LiveMap", ":" + Integer.toHexString(circleColor));
+
+            //If home location set, draw it on the map
+            Circle home = myMap.addCircle(new CircleOptions()
+                    .center(homeLocation)
+                    .radius(50)
+                    .fillColor(fill)
+                    .strokeWidth(5)
+                    .strokeColor(border)
+                    .clickable(false));
+            //Don't know what to do with it. Probably nothing
+            Toast.makeText(this.getContext(), "Circle drawn at " + homeLocation.toString(), Toast.LENGTH_LONG).show();
+
+        }
     }
 
     public void onRequestPermissionsResult(int requestCode,

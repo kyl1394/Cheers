@@ -16,6 +16,7 @@
 
     <Preference
         android:key="custom_set_home_location"
-        android:title="@string/pref_title_custom_set_home_location" />
+        android:title="@string/pref_title_custom_set_home_location"
+        android:summary="Set your current location as your home location"/>
 
 </PreferenceScreen>

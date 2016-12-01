@@ -135,8 +135,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
         Settings s = Settings.getSettingsAndSetPreferenceContext(this);
 
-       // Toast.makeText(this, "Contact: ", Toast.LENGTH_LONG).show();
-        s.makeCallWithContact(this);
+        Toast.makeText(this, "Location: " + s.getHomeLocation().toString(), Toast.LENGTH_LONG).show();
+        //s.makeCall(this);
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -214,10 +214,24 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     return true;
                 }
             });
+            Contact setContact = Settings.getSettings().getContact();
+            if(setContact != null)
+                customContact.setSummary(setContact.toString());
 
             screen.addPreference(customContact);
             //setPreferenceScreen(screen);
             //addPreferencesFromResource(R.xml.pref_general);
+
+            final Preference customLocation = findPreference("custom_set_home_location");
+            customLocation.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    String location = MainActivity.latLng.latitude + "," + MainActivity.latLng.longitude;
+                    getPreferenceManager().getSharedPreferences().edit().putString(customLocation.getKey(), location).apply();
+                    Toast.makeText(preference.getContext(), "Location Saved: " + location, Toast.LENGTH_LONG).show();
+                    return true;
+                }
+            });
 
             // Bind the summaries of EditText/List/Dialog/Ringtone preferences
             // to their values. When their values change, their summaries are
@@ -233,10 +247,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 case PICK_CONTACT:
                     if(resultCode == RESULT_OK) {
                         Contact contact = new Contact();
-                        String name = "";
-                        String contactId = "";
+                        String contactId;
                         String hasNumber = "";
-                        String number = "";
 
                         Uri contactURI = data.getData();
 
