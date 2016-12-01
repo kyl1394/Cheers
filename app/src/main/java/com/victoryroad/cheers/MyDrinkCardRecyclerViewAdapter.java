@@ -39,10 +39,18 @@ public class MyDrinkCardRecyclerViewAdapter extends RecyclerView.Adapter<MyDrink
 
     private final List<CheckIn> mValues;
     private final MyFeedFragment.OnListFragmentInteractionListener mListener;
+    private final DrinkFeedFragment.OnListFragmentInteractionListener mListener2;
 
     public MyDrinkCardRecyclerViewAdapter(List<CheckIn> items, MyFeedFragment.OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
+        mListener2 = null;
+    }
+
+    public MyDrinkCardRecyclerViewAdapter(List<CheckIn> items, DrinkFeedFragment.OnListFragmentInteractionListener listener) {
+        mValues = items;
+        mListener2 = listener;
+        mListener = null;
     }
 
     @Override
@@ -76,6 +84,10 @@ public class MyDrinkCardRecyclerViewAdapter extends RecyclerView.Adapter<MyDrink
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
                     mListener.onListFragmentInteraction(holder.mItem);
+                } else if (null != mListener2) {
+                    // Notify the active callbacks interface (the activity, if the
+                    // fragment is attached to one) that an item has been selected.
+                    mListener2.onListFragmentInteraction(holder.mItem);
                 }
             }
         });

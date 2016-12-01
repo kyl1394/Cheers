@@ -17,6 +17,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.facebook.AccessToken;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
+import com.facebook.Profile;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DataSnapshot;
@@ -32,10 +37,11 @@ import com.victoryroad.cheers.dummy.DummyContent;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 
-public class MainActivity extends AppCompatActivity implements LiveMapFragment.OnLocationUpdateListener, MyFeedFragment.OnListFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements LiveMapFragment.OnLocationUpdateListener, MyFeedFragment.OnListFragmentInteractionListener, DrinkFeedFragment.OnListFragmentInteractionListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -53,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
     private ViewPager mViewPager;
     private LiveMapFragment mLiveMapFragment;
     private MyFeedFragment mMyFeedFragment;
+    private DrinkFeedFragment mDrinkFeedFragment;
 
     public static UserDat user;
     public static LatLng latLng;
@@ -63,8 +70,12 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
         setContentView(R.layout.activity_main);
 
         mLiveMapFragment = LiveMapFragment.newInstance("SecondFragment");
+
         mMyFeedFragment = MyFeedFragment.newInstance("ThirdFragment", "Param 2");
         mMyFeedFragment.mAdapter = new MyDrinkCardRecyclerViewAdapter(mMyFeedFragment.CheckIns, mMyFeedFragment.mListener);
+
+        mDrinkFeedFragment = DrinkFeedFragment.newInstance("FirstFragment", "Param 2");
+        mDrinkFeedFragment.mAdapter = new MyDrinkCardRecyclerViewAdapter(mDrinkFeedFragment.CheckIns, mDrinkFeedFragment.mListener);
 
         String userGson = getIntent().getStringExtra("User");
         user = (new Gson()).fromJson(userGson, UserDat.class);
@@ -82,6 +93,8 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
+        LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("user_friends"));
+        getDrinksForFeed();
         getDrinksForCurrentUser();
     }
 
@@ -175,7 +188,82 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
                                     CheckIn checkin = new CheckIn(drinkName, location, time);
                                     checkin.Categories = categories;
                                     mMyFeedFragment.CheckIns.add(checkin);
-                                    mMyFeedFragment.mAdapter.notifyDataSetChanged();
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void getDrinksForFeed() {
+        String userId = Profile.getCurrentProfile().getId();
+
+        new GraphRequest(
+                AccessToken.getCurrentAccessToken(),
+                "/" + userId + "/friends",
+                null,
+                HttpMethod.GET,
+                new GraphRequest.Callback() {
+                    public void onCompleted(GraphResponse response) {
+                        response.getJSONArray();
+                    }
+                }
+        ).executeAsync();
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("Checkins");
+
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Iterator iter = dataSnapshot.getChildren().iterator();
+                while (iter.hasNext()) {
+                    DataSnapshot child = (DataSnapshot) iter.next();
+                    final String checkinKey = child.getKey();
+
+                    DatabaseReference checkinRef = FirebaseDatabase.getInstance().getReference("Checkins").child(checkinKey);
+                    checkinRef.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(final DataSnapshot checkinDataSnapshot) {
+//                            CheckIn in = dataSnapshot.child(checkinKey).getValue(CheckIn.class);
+//                            CheckIn in = (new Gson()).fromJson(dataSnapshot.child(checkinKey), CheckIn.class);
+                            String drinkKey = checkinDataSnapshot.child("DrinkKey").getValue(String.class);
+
+                            FirebaseDatabase.getInstance().getReference("Drinks").child(drinkKey).addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    String drinkName = dataSnapshot.child("Name").getValue(String.class);
+                                    ArrayList<String> categories = new ArrayList<>();
+
+                                    for (DataSnapshot category : dataSnapshot.child("Categories").getChildren()) {
+                                        categories.add(category.getKey());
+                                    }
+
+                                    double lat = checkinDataSnapshot.child("Location").child("latitude").getValue(double.class);
+                                    double lng = checkinDataSnapshot.child("Location").child("longitude").getValue(double.class);
+                                    LatLng location = new LatLng(lat, lng);
+                                    mLiveMapFragment.addMarker(drinkName, lng, lat);
+                                    Date time = checkinDataSnapshot.child("Time").getValue(Date.class);
+//                            Date time = (new Gson()).fromJson(timeString, Date.class);
+
+                                    CheckIn checkin = new CheckIn(drinkName, location, time);
+                                    checkin.Categories = categories;
+                                    mMyFeedFragment.CheckIns.add(checkin);
                                 }
 
                                 @Override
@@ -248,9 +336,14 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
         @Override
         public Fragment getItem(int position) {
             switch(position) {
+                case 0:
+                    mDrinkFeedFragment.mAdapter.notifyDataSetChanged();
+                    return mDrinkFeedFragment;
                 case 1:
                     return mLiveMapFragment;
-                case 2: return mMyFeedFragment;
+                case 2:
+                    mMyFeedFragment.mAdapter.notifyDataSetChanged();
+                    return mMyFeedFragment;
                 default: return PlaceholderFragment.newInstance(position + 1);
             }
         }
