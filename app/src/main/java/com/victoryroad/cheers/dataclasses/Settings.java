@@ -18,20 +18,11 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
-import static com.victoryroad.cheers.dataclasses.Settings.DesignatedDriver.CONTACT;
-import static com.victoryroad.cheers.dataclasses.Settings.DesignatedDriver.NONE;
-import static com.victoryroad.cheers.dataclasses.Settings.DesignatedDriver.NULL;
-import static com.victoryroad.cheers.dataclasses.Settings.DesignatedDriver.UBER;
-
-
 public class Settings {
     //First value is how long to have vibration pattern off, then how long to have it on, and so on for the length of the array
     private final long[] vibrationPattern = new long[] {0, 500, 200, 500};
 
     private SharedPreferences p;
-    private Context prefManager;
-
-    private MediaPlayer mMediaPlayer;
 
     private static Settings mSetting = new Settings();
 
@@ -99,12 +90,8 @@ public class Settings {
         };
     }
 
-    public static Settings getSettings() {
-        return mSetting;
-    }
-
-    public static Settings getSettingsAndSetPreferenceContext(Context prefContext) {
-        mSetting.setManager(prefContext);
+    public static Settings getSettingsFor(Context prefContext) {
+        mSetting.updateP(prefContext);
         return mSetting;
     }
 
@@ -140,7 +127,7 @@ public class Settings {
     public void playRingtone(Context context) {
         if(this.wantsReminders() && this.wantsRing()) {
 
-            mMediaPlayer = new MediaPlayer();
+            MediaPlayer mMediaPlayer = new MediaPlayer();
             try {
                 mMediaPlayer.setDataSource(context, this.getRingtone());
                 final AudioManager audioManager = (AudioManager) context
@@ -164,20 +151,13 @@ public class Settings {
         }
     }
 
-    private void setManager(Context prefManager) {
-        Log.w("Settings", prefManager.toString());
-        this.prefManager = prefManager;
-    }
-
-    private void updateP() {
+    private void updateP(Context prefManager) {
         if(prefManager == null)
             return;
         p = PreferenceManager.getDefaultSharedPreferences(prefManager);
     }
 
     public DesignatedDriver getDesignatedDriver() {
-        updateP();
-
         String result = p.getString("example_list", "0");
 
         DesignatedDriver dd = DesignatedDriver.NULL;
@@ -197,7 +177,6 @@ public class Settings {
     }
 
     public Contact getContact() {
-        updateP();
         String contact = p.getString("custom_contact", null);
         if(contact == null)
             return null;
@@ -206,8 +185,6 @@ public class Settings {
     }
 
     public LatLng getHomeLocation() {
-        updateP();
-
         String loc = p.getString("custom_set_home_location", "");
 
         if(loc.equals(""))
@@ -219,20 +196,23 @@ public class Settings {
         return new LatLng(lat, lng);
     }
 
+    public int getHomeLocationRadius() {
+        //TODO implement slider for setting this radius
+
+        return 50;
+    }
+
     public boolean wantsReminders() {
-        updateP();
         boolean r = p.getBoolean("notifications_new_message", false);
         Log.w("Settings", "wantsReminders: " + r);
         return r;
     }
 
     public int timeBetweenNotifications() {
-        updateP();
         return Integer.parseInt(p.getString("time_between_notifications", "-1"));
     }
 
     public boolean wantsRing() {
-        updateP();
 
         boolean r = p.getBoolean("notifications_new_message_ring", false);
         Log.w("Settings", "wantsRing: " + r);
@@ -240,17 +220,12 @@ public class Settings {
     }
 
     public Uri getRingtone() {
-        updateP();
         return Uri.parse(p.getString("notifications_new_message_ringtone", "DEFAULT_SOUND"));
     }
 
     public boolean wantsVibrate() {
-        updateP();
-
         boolean r = p.getBoolean("notifications_new_message_vibrate", false);
         Log.w("Settings", "wantsVibrate: " + r);
         return r;
     }
-
-
 }

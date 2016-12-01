@@ -26,11 +26,9 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.victoryroad.cheers.dataclasses.Contact;
 import com.victoryroad.cheers.dataclasses.Settings;
 
-import java.net.URI;
 import java.util.List;
 
 /**
@@ -133,9 +131,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         super.onCreate(savedInstanceState);
         setupActionBar();
 
-        Settings s = Settings.getSettingsAndSetPreferenceContext(this);
+        //Settings s = Settings.getSettingsFor(this);
 
-        Toast.makeText(this, "Location: " + s.getHomeLocation().toString(), Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, "Location: " + s.getHomeLocation().toString(), Toast.LENGTH_LONG).show();
         //s.makeCall(this);
     }
 
@@ -214,7 +212,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     return true;
                 }
             });
-            Contact setContact = Settings.getSettings().getContact();
+            Contact setContact = Settings.getSettingsFor(this.getActivity()).getContact();
             if(setContact != null)
                 customContact.setSummary(setContact.toString());
 
