@@ -131,10 +131,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         super.onCreate(savedInstanceState);
         setupActionBar();
 
-        //Settings s = Settings.getSettingsFor(this);
+        Settings s = Settings.getSettingsFor(this);
 
         //Toast.makeText(this, "Location: " + s.getHomeLocation().toString(), Toast.LENGTH_LONG).show();
-        //s.makeCall(this);
+        s.makeCall(this);
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {

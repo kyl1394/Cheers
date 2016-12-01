@@ -13,8 +13,10 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.victoryroad.cheers.MainActivity;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -113,7 +115,15 @@ public class Settings {
     }
 
     private void makeCallWithUber(Context context) {
-        //TODO
+        LatLng toLoc = this.getHomeLocation();
+        String uri = String.format(Locale.ENGLISH, "http://maps.google.com/maps?daddr=%f,%f&dirflg=%s)", toLoc.latitude, toLoc.longitude, "w");
+
+        Intent loadMaps = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+
+        //"google.navigation:q="+toLoc.latitude+","+toLoc.longitude)
+        loadMaps.setPackage("com.google.android.apps.maps");
+
+        context.startActivity(loadMaps);
     }
 
     private void makeCallWithContact(Context context) {
