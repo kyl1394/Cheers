@@ -48,4 +48,9 @@ public class CheckIn {
     public CheckIn() {
 
     }
+
+    @Override
+    public String toString() {
+        return "This worked. The card was successfully transfered.";
+    }
 }

@@ -187,13 +187,15 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
                                     double lat = checkinDataSnapshot.child("Location").child("latitude").getValue(double.class);
                                     double lng = checkinDataSnapshot.child("Location").child("longitude").getValue(double.class);
                                     LatLng location = new LatLng(lat, lng);
-                                    mLiveMapFragment.addMarker(drinkName, lng, lat);
+                                    //mLiveMapFragment.addMarker(drinkName, lng, lat);
                                     Date time = checkinDataSnapshot.child("Time").getValue(Date.class);
 //                            Date time = (new Gson()).fromJson(timeString, Date.class);
 
                                     CheckIn checkin = new CheckIn(drinkName, location, time);
                                     checkin.Categories = categories;
                                     mMyFeedFragment.CheckIns.add(checkin);
+
+                                    mLiveMapFragment.addMarker(checkin, location);
                                 }
 
                                 @Override

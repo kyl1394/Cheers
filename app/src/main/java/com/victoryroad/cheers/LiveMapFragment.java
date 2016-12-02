@@ -204,8 +204,9 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
 
         myMap.setOnMyLocationChangeListener(listener);
 
-        myMap.setInfoWindowAdapter(new CustomGMapInfoWindowAdapter(this.getContext(), null));
-
+        CustomGMapInfoWindowAdapter adapter = new CustomGMapInfoWindowAdapter(this.getContext(), null);
+        myMap.setInfoWindowAdapter(adapter);
+        myMap.setOnMarkerClickListener(adapter);
         redrawHomeLocation();
 
         addMarker("Test", 42.0283, -93.648);
@@ -265,6 +266,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
      */
     @Deprecated
     public void addMarker(String title, double longitude, double latitude) {
+        hold();
         markers.add(
                 myMap.addMarker(
                         new MarkerOptions()
@@ -276,6 +278,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     public void addMarker(String title, LatLng location) {
+        hold();
         markers.add(
                 myMap.addMarker(
                         new MarkerOptions()
@@ -286,6 +289,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     public void addMarker(String title, LatLng location, BitmapDescriptor icon) {
+        hold();
         markers.add(
                 myMap.addMarker(
                         new MarkerOptions()
@@ -297,18 +301,35 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     public void addMarker(CheckIn cardData, LatLng location, BitmapDescriptor icon) {
-
-        myMap.setInfoWindowAdapter(new CustomGMapInfoWindowAdapter(this.getContext(), cardData));
+        hold();
         markers.add(
                 myMap.addMarker(
                         new MarkerOptions()
+                                .title(CustomGMapInfoWindowAdapter.DRINKCARD_LAYOUT)
                                 .position(location)
                                 .icon(icon)
                 )
         );
-
     }
 
+    public void addMarker(CheckIn cardData, LatLng location) {
+        hold();
+        Marker addedMarker =
+                myMap.addMarker(
+                        new MarkerOptions()
+                                .title(CustomGMapInfoWindowAdapter.DRINKCARD_LAYOUT)
+                                .alpha(0.25f)
+                                .flat(true)
+                                .position(location)
+                );
+
+        addedMarker.setTag(cardData);
+        markers.add(addedMarker);
+    }
+
+    public void hold() {
+
+    }
 
     //
     /**
