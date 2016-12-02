@@ -4,6 +4,7 @@ package com.victoryroad.cheers;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.media.Ringtone;
@@ -23,8 +24,11 @@ import android.preference.RingtonePreference;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.Toast;
 
-import java.net.URI;
+import com.victoryroad.cheers.dataclasses.Contact;
+import com.victoryroad.cheers.dataclasses.Settings;
+
 import java.util.List;
 
 /**
@@ -39,6 +43,7 @@ import java.util.List;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
+
     /**
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
@@ -125,6 +130,11 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
+
+        Settings s = Settings.getSettingsFor(this);
+
+        //Toast.makeText(this, "Location: " + s.getHomeLocation().toString(), Toast.LENGTH_LONG).show();
+        //s.makeCall(this);
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -202,16 +212,30 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     return true;
                 }
             });
+            Contact setContact = Settings.getSettingsFor(this.getActivity()).getContact();
+            if(setContact != null)
+                customContact.setSummary(setContact.toString());
 
             screen.addPreference(customContact);
             //setPreferenceScreen(screen);
             //addPreferencesFromResource(R.xml.pref_general);
 
+            final Preference customLocation = findPreference("custom_set_home_location");
+            customLocation.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    String location = MainActivity.latLng.latitude + "," + MainActivity.latLng.longitude;
+                    getPreferenceManager().getSharedPreferences().edit().putString(customLocation.getKey(), location).apply();
+                    Toast.makeText(preference.getContext(), "Location Saved: " + location, Toast.LENGTH_LONG).show();
+                    return true;
+                }
+            });
+
             // Bind the summaries of EditText/List/Dialog/Ringtone preferences
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("example_text"));
+            //bindPreferenceSummaryToValue(findPreference("example_text"));
             bindPreferenceSummaryToValue(findPreference("example_list"));
         }
 
@@ -220,19 +244,40 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             switch(requestCode){
                 case PICK_CONTACT:
                     if(resultCode == RESULT_OK) {
-                        String name = "";
+                        Contact contact = new Contact();
+                        String contactId;
+                        String hasNumber = "";
 
                         Uri contactURI = data.getData();
 
                         Cursor cursor = getActivity().getContentResolver().query(contactURI, null, null, null, null, null);
 
                         if(cursor.moveToFirst()) {
-                            name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+                            hasNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER));
                         }
 
-                        findPreference("custom_contact").setSummary(name);
+                        if(hasNumber.equals("1")) {
+                            contact.name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+                            contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+                            Cursor phones = getActivity().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID +" = "+ contactId, null, null);
 
-                        Log.d("General Preferences", name);
+                            if (phones == null) {
+                                Log.w("SettingsActivity", "No Number Found");
+                            }
+
+                            if(phones != null && phones.moveToFirst()) {
+                                contact.number = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                                phones.close();
+                            }
+
+                            findPreference("custom_contact").setSummary(contact.toString());
+
+                            SharedPreferences p = getPreferenceManager().getSharedPreferences();
+                            p.edit().putString(findPreference("custom_contact").getKey(), contact.serialize()).apply();
+
+                            Log.d("General Preferences", contact.toString());
+                            cursor.close();
+                        }
                     }
                     break;
             }
@@ -308,4 +353,5 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             return super.onOptionsItemSelected(item);
         }
     }
+
 }

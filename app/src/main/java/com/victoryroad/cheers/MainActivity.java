@@ -22,6 +22,7 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.Profile;
+import com.facebook.Profile;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DataSnapshot;
@@ -75,8 +76,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mLiveMapFragment = LiveMapFragment.newInstance("SecondFragment");
-
+        mLiveMapFragment = LiveMapFragment.newInstance();
         mMyFeedFragment = MyFeedFragment.newInstance("ThirdFragment", "Param 2");
         mMyFeedFragment.mAdapter = new MyDrinkCardRecyclerViewAdapter(mMyFeedFragment.CheckIns, mMyFeedFragment.mListener);
 
@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
 
     @Override
     public void onLocationUpdate(Location loc) {
-        //TODO implement what to do when the location changes
+        MainActivity.latLng = new LatLng(loc.getLatitude(), loc.getLongitude());
     }
 
     @Override
@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
     }
 
     private void getDrinksForCurrentUser() {
-        String userId = MainActivity.user.getUserID();
+        String userId = Profile.getCurrentProfile().getId();
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("Checkins");
 
         ref.addValueEventListener(new ValueEventListener() {
