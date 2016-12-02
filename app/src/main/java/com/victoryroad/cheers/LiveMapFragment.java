@@ -27,6 +27,8 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.victoryroad.cheers.dataclasses.CheckIn;
+import com.victoryroad.cheers.dataclasses.CustomGMapInfoWindowAdapter;
 import com.victoryroad.cheers.dataclasses.Settings;
 
 import java.util.ArrayList;
@@ -202,6 +204,8 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
 
         myMap.setOnMyLocationChangeListener(listener);
 
+        myMap.setInfoWindowAdapter(new CustomGMapInfoWindowAdapter(this.getContext(), null));
+
         redrawHomeLocation();
 
         addMarker("Test", 42.0283, -93.648);
@@ -232,6 +236,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
                     .strokeWidth(Settings.getSettingsFor(this.getContext()).getHomeLocationRadius() / 10)
                     .strokeColor(border)
                     .clickable(true));
+
 
             addMarker("Home", homeLocation, BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
         }
@@ -267,6 +272,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
                                 .position(new LatLng(latitude, longitude))
                 )
         );
+
     }
 
     public void addMarker(String title, LatLng location) {
@@ -290,6 +296,21 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
         );
     }
 
+    public void addMarker(CheckIn cardData, LatLng location, BitmapDescriptor icon) {
+
+        myMap.setInfoWindowAdapter(new CustomGMapInfoWindowAdapter(this.getContext(), cardData));
+        markers.add(
+                myMap.addMarker(
+                        new MarkerOptions()
+                                .position(location)
+                                .icon(icon)
+                )
+        );
+
+    }
+
+
+    //
     /**
      * Removes a Marker on the map by finding it in the list using its title
      *
