@@ -20,63 +20,57 @@
 
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:orientation="horizontal" >
+        android:orientation="vertical">
 
-        <EditText
-            android:layout_width="106dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="none"
-            android:editable="false"
-            android:text="Name:"
-            android:ems="10"
-            android:id="@+id/name_label"
-            android:maxLines="1"
-            android:labelFor="@+id/name_input"
-            android:textColor="@android:color/white"
-            android:clickable="false" />
+            android:orientation="horizontal"
+            android:paddingRight="0dp"
+            android:paddingBottom="15dp"
+            android:paddingTop="15dp">
 
-        <EditText
+            <TextView
+                android:layout_width="102dp"
+                android:layout_height="match_parent"
+                android:inputType="none"
+                android:editable="false"
+                android:text="Name:"
+                android:ems="10"
+                android:id="@+id/name_label"
+                android:maxLines="1"
+                android:labelFor="@+id/name_input"
+                android:textColor="@android:color/white"
+                android:clickable="false"
+                android:textSize="24sp" />
+
+            <EditText
+                android:layout_height="match_parent"
+                android:inputType="textPersonName"
+                android:text="Custom Drink Name"
+                android:ems="10"
+                android:id="@+id/name_input"
+                android:maxLines="1"
+                android:background="?android:attr/colorBackground"
+                android:layout_width="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignBottom="@+id/name_label" />
+
+        </LinearLayout>
+
+        <Button
+            android:text="Set Drink Categories"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPersonName"
-            android:text="Custom Drink Name"
-            android:ems="10"
-            android:id="@+id/name_input"
-            android:layout_weight="0.85"
-            android:maxLines="1"
-            android:background="?android:attr/colorBackground"
-            android:layout_width="200dp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:orientation="horizontal" >
-
-        <EditText
-            android:layout_width="106dp"
-            android:layout_height="wrap_content"
-            android:inputType="none"
-            android:editable="false"
-            android:text="Categories:"
-            android:ems="10"
-            android:id="@+id/categories_label"
-            android:maxLines="1"
-            android:labelFor="@+id/categories_selector"
-            android:textColor="@android:color/white"
-            android:clickable="false" />
-
-        <Spinner
-            android:layout_width="200dp"
-            android:id="@+id/categories_selector"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:layout_gravity="center_vertical"
-            android:background="@android:color/white"
-            android:layout_height="wrap_content" />
+            android:id="@+id/setCategories"
+            android:layout_below="@+id/name_label"
+            android:layout_alignStart="@+id/name_label"
+            android:layout_alignEnd="@+id/name_input"
+            android:layout_row="1"
+            android:layout_column="1" />
 
     </LinearLayout>
 
@@ -100,6 +94,7 @@
             android:layout_width="116dp"
             android:layout_height="wrap_content"
             android:id="@+id/save_button"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:enabled="false" />
     </LinearLayout>
 </LinearLayout>

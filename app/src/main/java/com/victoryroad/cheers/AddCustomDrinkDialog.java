@@ -16,7 +16,7 @@ import android.widget.Button;
 public class AddCustomDrinkDialog extends Dialog implements android.view.View.OnClickListener {
     public Activity activity;
     public Dialog dialog;
-    public Button cancel, save;
+    public Button cancel, save, addCategories;
 
     public AddCustomDrinkDialog(Activity activity) {
         super(activity);
@@ -31,8 +31,16 @@ public class AddCustomDrinkDialog extends Dialog implements android.view.View.On
         setContentView(R.layout.dialog_add_custom_drink);
         save = (Button) findViewById(R.id.save_button);
         cancel = (Button) findViewById(R.id.cancel_button);
+        addCategories = (Button) findViewById(R.id.setCategories);
+
         save.setOnClickListener(this);
         cancel.setOnClickListener(this);
+        addCategories.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
     }
 
     @Override
