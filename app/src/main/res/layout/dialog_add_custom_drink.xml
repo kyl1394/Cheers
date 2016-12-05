@@ -41,7 +41,7 @@
         <EditText
             android:layout_height="wrap_content"
             android:inputType="textPersonName"
-            android:text="Custom Drink Name"
+            android:hint="Custom Drink Name"
             android:ems="10"
             android:id="@+id/name_input"
             android:layout_weight="0.85"
