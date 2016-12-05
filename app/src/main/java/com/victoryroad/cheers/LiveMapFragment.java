@@ -28,6 +28,11 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.uber.sdk.android.core.UberSdk;
+import com.uber.sdk.android.rides.RequestDeeplink;
+import com.uber.sdk.android.rides.RideParameters;
+import com.uber.sdk.core.auth.Scope;
+import com.uber.sdk.rides.client.SessionConfiguration;
 import com.victoryroad.cheers.dataclasses.CheckIn;
 import com.victoryroad.cheers.dataclasses.CustomGMapInfoWindowAdapter;
 import com.victoryroad.cheers.dataclasses.Settings;
@@ -35,6 +40,7 @@ import com.victoryroad.cheers.dataclasses.Settings;
 import java.util.ArrayList;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -65,7 +71,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
     public LiveMapFragment() {
         // Required empty public constructor
     }
-
+    private static SessionConfiguration config;
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -77,6 +83,22 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
         LiveMapFragment fragment = new LiveMapFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
+
+        config = new SessionConfiguration.Builder()
+                // mandatory
+                .setClientId("jE0s0Ilok1y5WNj6TWA8FDOeoskoLlIe")
+                // required for enhanced button features
+                .setServerToken("PRlGcle3iECIb4HFnf8KpTtA0RmdPk77F3C52qnr")
+                // required for implicit grant authentication
+                .setRedirectUri("<REDIRECT_URI>")
+                // required scope for Ride Request Widget features
+                .setScopes(Arrays.asList(Scope.RIDE_WIDGETS))
+                // optional: set Sandbox as operating environment
+                .setEnvironment(SessionConfiguration.Environment.SANDBOX)
+                .build();
+
+        UberSdk.initialize(config);
+
         //Add no args. None needed
         return fragment;
     }
@@ -207,6 +229,20 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
                 mListener.onLocationUpdate(location);
             }
         };
+
+        myMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                RideParameters params = new RideParameters.Builder()
+                        .setPickupToMyLocation()
+                        .setDropoffLocation(marker.getPosition().latitude, marker.getPosition().longitude, "", "").build();
+                RequestDeeplink deeplink = new RequestDeeplink.Builder(getContext())
+                        .setSessionConfiguration(config)
+                        .setRideParameters(params).build();
+
+                deeplink.execute();
+            }
+        });
 
         myMap.setOnMyLocationChangeListener(listener);
 

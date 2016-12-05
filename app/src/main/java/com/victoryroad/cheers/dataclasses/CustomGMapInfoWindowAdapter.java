@@ -1,9 +1,13 @@
 package com.victoryroad.cheers.dataclasses;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.facebook.Profile;
@@ -54,8 +58,16 @@ public class CustomGMapInfoWindowAdapter implements GoogleMap.InfoWindowAdapter,
             String categories = cardData.Categories.toString().substring(1, cardData.Categories.toString().length()-1);
 
             categoryView.setText(categories);
-
+            LinearLayout container = (LinearLayout) cardLayout.findViewById(R.id.container);
+            TextView clickToCall = new TextView(cardLayout.getContext());
+            clickToCall.setTypeface(null, Typeface.ITALIC);
+            clickToCall.setTextColor(Color.RED);
+            clickToCall.setText(R.string.RequestUberText);
+            clickToCall.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+            clickToCall.setPadding(0, 5, 0, 0);
+            container.addView(clickToCall);
         }
+
         return cardLayout;
     }
 
