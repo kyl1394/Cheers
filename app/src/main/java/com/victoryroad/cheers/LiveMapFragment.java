@@ -3,6 +3,7 @@ package com.victoryroad.cheers;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -34,6 +35,8 @@ import com.victoryroad.cheers.dataclasses.Settings;
 import java.util.ArrayList;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Random;
 
 import static com.google.android.gms.wearable.DataMap.TAG;
 
@@ -57,6 +60,8 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
     MapView mMapView;
     private View rootView;
 
+    private static HashMap<String, Float> friendColors;
+
     public LiveMapFragment() {
         // Required empty public constructor
     }
@@ -68,6 +73,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
      * @return A new instance of fragment LiveMapFragment.
      */
     public static LiveMapFragment newInstance() {
+        friendColors = new HashMap<>();
         LiveMapFragment fragment = new LiveMapFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
@@ -311,11 +317,14 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
 
     public void addMarker(CheckIn cardData, LatLng location) {
         hold();
+        Random rand = new Random(Long.parseLong(cardData.id));
+        float x = rand.nextFloat() * 360;
+
         Marker addedMarker =
                 myMap.addMarker(
                         new MarkerOptions()
                                 .title(CustomGMapInfoWindowAdapter.DRINKCARD_LAYOUT)
-                                .alpha(0.25f)
+                                .icon(BitmapDescriptorFactory.defaultMarker(x))
                                 .flat(true)
                                 .position(location)
                 );
