@@ -28,7 +28,6 @@
                 <com.facebook.login.widget.ProfilePictureView
                     android:layout_width="69dp"
                     android:layout_height="match_parent"
-                    app:srcCompat="@drawable/com_facebook_button_icon_blue"
                     android:scaleType="fitStart"
                     android:id="@+id/profile_pic"
                     android:paddingRight="10dp" />

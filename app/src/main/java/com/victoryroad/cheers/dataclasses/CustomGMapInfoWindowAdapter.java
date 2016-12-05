@@ -26,16 +26,15 @@ public class CustomGMapInfoWindowAdapter implements GoogleMap.InfoWindowAdapter,
     private Context viewContext = null;
     private CheckIn cardData;
 
-    public CustomGMapInfoWindowAdapter(Context context, CheckIn cardData) {
+    public CustomGMapInfoWindowAdapter(Context context, CheckIn data) {
         viewContext = context;
-
+        cardData = data;
     }
 
     @Override
     public View getInfoWindow(Marker marker) {
         if(!marker.getTitle().equals(DRINKCARD_LAYOUT))
             return null;
-
         cardLayout = LayoutInflater.from(viewContext).inflate(R.layout.fragment_drinkcard, null);
 
         if(marker.getTag() != null && marker.getTitle().equals(DRINKCARD_LAYOUT)) {
@@ -45,23 +44,18 @@ public class CustomGMapInfoWindowAdapter implements GoogleMap.InfoWindowAdapter,
             TextView drinkTitleView = (TextView) cardLayout.findViewById(R.id.drink_text);
             TextView categoryView = (TextView) cardLayout.findViewById(R.id.category_text);
 
+            profileView.setDefaultProfilePicture(cardData.getProfilePic());
 
-            profileView.setProfileId(Profile.getCurrentProfile().getId());
             nameView.setText(cardData.userName);
             DateFormat sdf = SimpleDateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
             dateView.setText(sdf.format(cardData.Time));
             drinkTitleView.setText(cardData.DrinkKey);
 
-            String totalString = "";
-            for(String s: cardData.Categories) {
-                totalString += s;
-            }
+            String categories = cardData.Categories.toString().substring(1, cardData.Categories.toString().length()-1);
 
-            categoryView.setText(totalString);
+            categoryView.setText(categories);
 
         }
-
-
         return cardLayout;
     }
 

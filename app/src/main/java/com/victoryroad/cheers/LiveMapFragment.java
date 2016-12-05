@@ -204,9 +204,6 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
 
         myMap.setOnMyLocationChangeListener(listener);
 
-        CustomGMapInfoWindowAdapter adapter = new CustomGMapInfoWindowAdapter(this.getContext(), null);
-        myMap.setInfoWindowAdapter(adapter);
-        myMap.setOnMarkerClickListener(adapter);
         redrawHomeLocation();
 
         addMarker("Test", 42.0283, -93.648);
