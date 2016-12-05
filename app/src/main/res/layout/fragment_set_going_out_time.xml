@@ -113,13 +113,14 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:id="@+id/cancelButton">
 
             <Button
                 android:text="Cancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/Cancel"
+                android:id="@+id/cancel_button"
                 android:layout_weight="1"
                 android:background="@color/com_facebook_button_background_color_disabled"
                 android:layout_margin="5dp" />
@@ -128,7 +129,7 @@
                 android:text="Save"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/button2"
+                android:id="@+id/save_time"
                 android:layout_weight="1"
                 android:background="@color/com_facebook_button_send_background_color_pressed"
                 android:layout_margin="5dp" />

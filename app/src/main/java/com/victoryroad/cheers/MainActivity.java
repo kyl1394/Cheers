@@ -26,6 +26,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.victoryroad.cheers.dataclasses.UserDat;
 
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -128,6 +129,8 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
                 // Create new fragment and transaction
                 final Dialog dialog = new Dialog(MainActivity.this);
                 dialog.setContentView(R.layout.fragment_set_going_out_time);
+
+                // Set default going out date
                 final EditText dateSelector = (EditText) dialog.findViewById(R.id.dateSelector);
                 Date today = Calendar.getInstance().getTime();
                 SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
@@ -157,7 +160,6 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
                                 myCalendar.get(Calendar.DAY_OF_MONTH)).show();
                     }
                 });
-
 
                 dialog.show();
 
@@ -209,6 +211,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
                 String returnTime = returnTime12Format.format(curReturnDate);
                 returnSelector.setText(returnTime);
 
+                // Get return time
                 returnSelector.setOnClickListener(new View.OnClickListener() {
 
                     @Override
@@ -231,6 +234,17 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
                                     }
                                 }, mHour, mMinute, false);
                         timePickerDialog.show();
+                    }
+                });
+
+                // Cancel button action
+                Button cancelButton;
+                cancelButton = (Button) dialog.findViewById(R.id.cancel_button);
+                cancelButton.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        dialog.dismiss();
                     }
                 });
 
