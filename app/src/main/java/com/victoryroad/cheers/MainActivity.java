@@ -1,6 +1,10 @@
 package com.victoryroad.cheers;
 
+import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.icu.text.TimeZoneFormat;
 import android.location.Location;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -22,7 +26,24 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.victoryroad.cheers.dataclasses.UserDat;
 
+import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.TimePicker;
+
+import java.sql.Time;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.SimpleTimeZone;
+import java.util.concurrent.TimeUnit;
+
+import static com.victoryroad.cheers.R.id.container;
+import static com.victoryroad.cheers.R.id.match_global_nicknames;
+import static com.victoryroad.cheers.R.id.timeSelector;
 
 public class MainActivity extends AppCompatActivity implements LiveMapFragment.OnLocationUpdateListener {
 
@@ -43,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
 
     public static UserDat user;
     public static LatLng latLng;
+    public static Calendar myCalendar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,11 +81,13 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
+        mViewPager = (ViewPager) findViewById(container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+
+        myCalendar = Calendar.getInstance();
     }
 
 
@@ -100,9 +124,128 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
                 startActivity(intent);
                 finish();
                 break;
+            case R.id.action_set_going_out_time:
+                // Create new fragment and transaction
+                final Dialog dialog = new Dialog(MainActivity.this);
+                dialog.setContentView(R.layout.fragment_set_going_out_time);
+                final EditText dateSelector = (EditText) dialog.findViewById(R.id.dateSelector);
+                Date today = Calendar.getInstance().getTime();
+                SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+                String folderName = formatter.format(today);
+                dateSelector.setText(folderName);
+                final DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int monthOfYear,
+                                          int dayOfMonth) {
+                        // TODO Auto-generated method stub
+                        myCalendar.set(Calendar.YEAR, year);
+                        myCalendar.set(Calendar.MONTH, monthOfYear);
+                        myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        updateLabel(dateSelector);
+                    }
+
+                };
+
+                dateSelector.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        // TODO Auto-generated method stub
+                        new DatePickerDialog(MainActivity.this, date, myCalendar
+                                .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                                myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+                    }
+                });
+
+
+                dialog.show();
+
+                // Get Current Time
+                final int mHour = myCalendar.get(Calendar.HOUR_OF_DAY);
+                final int mMinute = myCalendar.get(Calendar.MINUTE);
+                final EditText timeSelector = (EditText) dialog.findViewById(R.id.timeSelector);
+                final EditText returnSelector = (EditText) dialog.findViewById(R.id.returnSelector);
+
+                // Set default going out time to current time
+                final String time24Format = "H:mm"; //In which you need put here
+                final DateFormat sdf = new SimpleDateFormat(time24Format, Locale.US);
+                final DateFormat time12Format = SimpleDateFormat.getTimeInstance(DateFormat.SHORT);
+                Date curDate = Calendar.getInstance().getTime();
+                String goTime = time12Format.format(curDate);
+                timeSelector.setText(goTime);
+
+                timeSelector.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        // TODO Auto-generated method stub
+                        TimePickerDialog timePickerDialog = new TimePickerDialog(MainActivity.this,
+                                new TimePickerDialog.OnTimeSetListener() {
+
+                                    @Override
+                                    public void onTimeSet(TimePicker view, int hourOfDay,
+                                                          int minute) {
+                                        view.setIs24HourView(false);
+                                        String myFormat = "H:mm"; //In which you need put here
+                                        DateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+                                        try {
+                                            Date date = sdf.parse(hourOfDay + ":" + minute);
+                                            timeSelector.setText(SimpleDateFormat.getTimeInstance(DateFormat.SHORT).format(date));
+                                        } catch (ParseException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }, mHour, mMinute, false);
+                        timePickerDialog.show();
+                    }
+                });
+
+                // Set default return time to current time
+                final String returnTime24Format = "H:mm"; //In which you need put here
+                final DateFormat return_sdf = new SimpleDateFormat(returnTime24Format, Locale.US);
+                final DateFormat returnTime12Format = SimpleDateFormat.getTimeInstance(DateFormat.SHORT);
+                Date curReturnDate = Calendar.getInstance().getTime();
+                String returnTime = returnTime12Format.format(curReturnDate);
+                returnSelector.setText(returnTime);
+
+                returnSelector.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        // TODO Auto-generated method stub
+                        TimePickerDialog timePickerDialog = new TimePickerDialog(MainActivity.this,
+                                new TimePickerDialog.OnTimeSetListener() {
+
+                                    @Override
+                                    public void onTimeSet(TimePicker view, int hourOfDay,
+                                                          int minute) {
+                                        view.setIs24HourView(false);
+
+                                        try {
+                                            Date date = sdf.parse(hourOfDay + ":" + minute);
+                                            returnSelector.setText(time12Format.format(date));
+                                        } catch (ParseException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }, mHour, mMinute, false);
+                        timePickerDialog.show();
+                    }
+                });
+
+                break;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void updateLabel(EditText edittext) {
+
+        String myFormat = "MM/dd/yy"; //In which you need put here
+        SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+
+        edittext.setText(sdf.format(myCalendar.getTime()));
     }
 
     @Override
