@@ -3,6 +3,7 @@ package com.victoryroad.cheers;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -27,11 +28,15 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.victoryroad.cheers.dataclasses.CheckIn;
+import com.victoryroad.cheers.dataclasses.CustomGMapInfoWindowAdapter;
 import com.victoryroad.cheers.dataclasses.Settings;
 
 import java.util.ArrayList;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Random;
 
 import static com.google.android.gms.wearable.DataMap.TAG;
 
@@ -55,6 +60,8 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
     MapView mMapView;
     private View rootView;
 
+    private static HashMap<String, Float> friendColors;
+
     public LiveMapFragment() {
         // Required empty public constructor
     }
@@ -66,6 +73,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
      * @return A new instance of fragment LiveMapFragment.
      */
     public static LiveMapFragment newInstance() {
+        friendColors = new HashMap<>();
         LiveMapFragment fragment = new LiveMapFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
@@ -233,6 +241,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
                     .strokeColor(border)
                     .clickable(true));
 
+
             addMarker("Home", homeLocation, BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
         }
     }
@@ -260,6 +269,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
      */
     @Deprecated
     public void addMarker(String title, double longitude, double latitude) {
+        hold();
         markers.add(
                 myMap.addMarker(
                         new MarkerOptions()
@@ -267,9 +277,11 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
                                 .position(new LatLng(latitude, longitude))
                 )
         );
+
     }
 
     public void addMarker(String title, LatLng location) {
+        hold();
         markers.add(
                 myMap.addMarker(
                         new MarkerOptions()
@@ -280,6 +292,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     public void addMarker(String title, LatLng location, BitmapDescriptor icon) {
+        hold();
         markers.add(
                 myMap.addMarker(
                         new MarkerOptions()
@@ -290,6 +303,41 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback {
         );
     }
 
+    public void addMarker(CheckIn cardData, LatLng location, BitmapDescriptor icon) {
+        hold();
+        markers.add(
+                myMap.addMarker(
+                        new MarkerOptions()
+                                .title(CustomGMapInfoWindowAdapter.DRINKCARD_LAYOUT)
+                                .position(location)
+                                .icon(icon)
+                )
+        );
+    }
+
+    public void addMarker(CheckIn cardData, LatLng location) {
+        hold();
+        Random rand = new Random(Long.parseLong(cardData.id));
+        float x = rand.nextFloat() * 360;
+
+        Marker addedMarker =
+                myMap.addMarker(
+                        new MarkerOptions()
+                                .title(CustomGMapInfoWindowAdapter.DRINKCARD_LAYOUT)
+                                .icon(BitmapDescriptorFactory.defaultMarker(x))
+                                .flat(true)
+                                .position(location)
+                );
+
+        addedMarker.setTag(cardData);
+        markers.add(addedMarker);
+    }
+
+    public void hold() {
+
+    }
+
+    //
     /**
      * Removes a Marker on the map by finding it in the list using its title
      *

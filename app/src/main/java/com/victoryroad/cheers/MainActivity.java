@@ -1,7 +1,9 @@
 package com.victoryroad.cheers;
 
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.net.Uri;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -17,8 +19,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.facebook.AccessToken;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
 import com.facebook.Profile;
 import com.facebook.login.LoginManager;
+import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -27,16 +34,28 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.victoryroad.cheers.dataclasses.CheckIn;
+import com.victoryroad.cheers.dataclasses.CustomGMapInfoWindowAdapter;
 import com.victoryroad.cheers.dataclasses.UserDat;
-import com.victoryroad.cheers.dummy.DummyContent;
 
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
+import org.json.JSONArray;
+import org.json.JSONException;
 
-public class MainActivity extends AppCompatActivity implements LiveMapFragment.OnLocationUpdateListener, MyFeedFragment.OnListFragmentInteractionListener {
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.Callable;
+
+import static android.graphics.BitmapFactory.decodeStream;
+
+public class MainActivity extends AppCompatActivity implements LiveMapFragment.OnLocationUpdateListener, MyFeedFragment.OnListFragmentInteractionListener, DrinkFeedFragment.OnListFragmentInteractionListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -54,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
     private ViewPager mViewPager;
     private LiveMapFragment mLiveMapFragment;
     private MyFeedFragment mMyFeedFragment;
+    private DrinkFeedFragment mDrinkFeedFragment;
 
     public static UserDat user;
     public static LatLng latLng;
@@ -66,6 +86,9 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
         mLiveMapFragment = LiveMapFragment.newInstance();
         mMyFeedFragment = MyFeedFragment.newInstance("ThirdFragment", "Param 2");
         mMyFeedFragment.mAdapter = new MyDrinkCardRecyclerViewAdapter(mMyFeedFragment.CheckIns, mMyFeedFragment.mListener);
+
+        mDrinkFeedFragment = DrinkFeedFragment.newInstance("FirstFragment", "Param 2");
+        mDrinkFeedFragment.mAdapter = new MyDrinkCardRecyclerViewAdapter(mDrinkFeedFragment.CheckIns, mDrinkFeedFragment.mListener);
 
         String userGson = getIntent().getStringExtra("User");
         user = (new Gson()).fromJson(userGson, UserDat.class);
@@ -83,6 +106,8 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
+        LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("user_friends"));
+        getDrinksForFeed();
         getDrinksForCurrentUser();
     }
 
@@ -137,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
     }
 
     private void getDrinksForCurrentUser() {
-        String userId = Profile.getCurrentProfile().getId();
+        final String userId = Profile.getCurrentProfile().getId();
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("Checkins");
 
         ref.addValueEventListener(new ValueEventListener() {
@@ -169,14 +194,19 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
                                     double lat = checkinDataSnapshot.child("Location").child("latitude").getValue(double.class);
                                     double lng = checkinDataSnapshot.child("Location").child("longitude").getValue(double.class);
                                     LatLng location = new LatLng(lat, lng);
-                                    mLiveMapFragment.addMarker(drinkName, lng, lat);
                                     Date time = checkinDataSnapshot.child("Time").getValue(Date.class);
-//                            Date time = (new Gson()).fromJson(timeString, Date.class);
 
                                     CheckIn checkin = new CheckIn(drinkName, location, time);
                                     checkin.Categories = categories;
+                                    checkin.id = userId;
+                                    checkin.userName = Profile.getCurrentProfile().getName();
+                                    checkin.setProfilePic(userId);
                                     mMyFeedFragment.CheckIns.add(checkin);
-                                    mMyFeedFragment.mAdapter.notifyDataSetChanged();
+
+                                    CustomGMapInfoWindowAdapter adapter = new CustomGMapInfoWindowAdapter(mLiveMapFragment.getContext(), checkin);
+                                    mLiveMapFragment.myMap.setInfoWindowAdapter(adapter);
+                                    mLiveMapFragment.myMap.setOnMarkerClickListener(adapter);
+                                    mLiveMapFragment.addMarker(checkin, location);
                                 }
 
                                 @Override
@@ -200,6 +230,142 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
             }
         });
     }
+
+    private void getDrinksForFeed() {
+        String userId = Profile.getCurrentProfile().getId();
+
+        new GraphRequest(
+                AccessToken.getCurrentAccessToken(),
+                "/" + userId + "/friends",
+                null,
+                HttpMethod.GET,
+                new GraphRequest.Callback() {
+                    public void onCompleted(GraphResponse response) {
+                        try {
+                            JSONArray arr = response.getJSONObject().getJSONArray("data");
+
+
+
+
+
+
+
+                            for (int i = 0; i < arr.length(); i++) {
+                                Map<String, String> map = new HashMap<>();
+                                String id = arr.getJSONObject(i).get("id").toString();
+                                String name = arr.getJSONObject(i).get("name").toString();
+
+                                MyCallable getDataForCard = new GetDataForCard(map);
+
+                                iterateCheckinsForUser(id, name);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }
+        ).executeAsync();
+    }
+
+    private void iterateCheckinsForUser(final String id, final String name) {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(id).child("Checkins");
+
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot child : dataSnapshot.getChildren()) {
+                    final String checkinKey = child.getKey();
+
+                    DatabaseReference checkinRef = FirebaseDatabase.getInstance().getReference("Checkins").child(checkinKey);
+                    checkinRef.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(final DataSnapshot checkinDataSnapshot) {
+                            try {
+                                getDataForCard(checkinDataSnapshot, id, name);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public void getDataForCard(final DataSnapshot snapshot, final String id, final String name) {
+        String drinkKey = snapshot.child("DrinkKey").getValue(String.class);
+
+        FirebaseDatabase.getInstance().getReference("Drinks").child(drinkKey).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String drinkName = dataSnapshot.child("Name").getValue(String.class);
+                ArrayList<String> categories = new ArrayList<>();
+
+                for (DataSnapshot category : dataSnapshot.child("Categories").getChildren()) {
+                    categories.add(category.getKey());
+                }
+
+                double lat = snapshot.child("Location").child("latitude").getValue(double.class);
+                double lng = snapshot.child("Location").child("longitude").getValue(double.class);
+                final LatLng location = new LatLng(lat, lng);
+//                mLiveMapFragment.addMarker(drinkName, lng, lat);
+                Date time = snapshot.child("Time").getValue(Date.class);
+
+                final CheckIn checkin = new CheckIn(drinkName, location, time);
+                checkin.Categories = categories;
+                checkin.id = id;
+                checkin.userName = name;
+
+                checkin.setProfilePic(id);
+
+                mDrinkFeedFragment.CheckIns.add(checkin);
+                mDrinkFeedFragment.mAdapter.notifyDataSetChanged();
+                mLiveMapFragment.addMarker(checkin, location);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private class GetDataForCard extends MyCallable {
+        public DataSnapshot checkinDataSnapshot;
+        public HashMap<String, String> params;
+
+        public GetDataForCard(Map<String, String> _params) {
+            DataSnapshot checkinDataSnapshot = this.dataSnapshot;
+            Map<String, String> params = _params;
+        }
+
+        @Override
+        public Void call() throws Exception {
+
+
+            return null;
+        }
+    };
+
+    public static abstract class MyCallable<Void> implements Callable<Void> {
+        DataSnapshot dataSnapshot;
+
+        void callWithParam(DataSnapshot snapshot) throws Exception {
+            dataSnapshot = snapshot;
+            call();
+        }
+    };
 
     /**
      * A placeholder fragment containing a simple view.
@@ -249,9 +415,14 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
         @Override
         public Fragment getItem(int position) {
             switch(position) {
+                case 0:
+                    mDrinkFeedFragment.mAdapter.notifyDataSetChanged();
+                    return mDrinkFeedFragment;
                 case 1:
                     return mLiveMapFragment;
-                case 2: return mMyFeedFragment;
+                case 2:
+                    mMyFeedFragment.mAdapter.notifyDataSetChanged();
+                    return mMyFeedFragment;
                 default: return PlaceholderFragment.newInstance(position + 1);
             }
         }

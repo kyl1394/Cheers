@@ -39,10 +39,18 @@ public class MyDrinkCardRecyclerViewAdapter extends RecyclerView.Adapter<MyDrink
 
     private final List<CheckIn> mValues;
     private final MyFeedFragment.OnListFragmentInteractionListener mListener;
+    private final DrinkFeedFragment.OnListFragmentInteractionListener mListener2;
 
     public MyDrinkCardRecyclerViewAdapter(List<CheckIn> items, MyFeedFragment.OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
+        mListener2 = null;
+    }
+
+    public MyDrinkCardRecyclerViewAdapter(List<CheckIn> items, DrinkFeedFragment.OnListFragmentInteractionListener listener) {
+        mValues = items;
+        mListener2 = listener;
+        mListener = null;
     }
 
     @Override
@@ -55,17 +63,19 @@ public class MyDrinkCardRecyclerViewAdapter extends RecyclerView.Adapter<MyDrink
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         Profile profile = Profile.getCurrentProfile();
+        String id = mValues.get(position).id == null ? profile.getId() : mValues.get(position).id;
+        String userName = mValues.get(position).userName == null ? profile.getName() : mValues.get(position).userName;
 
         holder.mItem = mValues.get(position);
         holder.mDrinkName.setText(mValues.get(position).DrinkKey);
         String categoriesString = mValues.get(position).Categories.toString();
+
         holder.mCategories.setText("Categories:\n" + categoriesString.substring(1, categoriesString.length() - 1));
         DateFormat sdf = SimpleDateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
-
         holder.mDate.setText(sdf.format(mValues.get(position).Time));
-        holder.mName.setText(profile.getName());
 
-        holder.mProfilePic.setProfileId(Profile.getCurrentProfile().getId());
+        holder.mName.setText(userName);
+        holder.mProfilePic.setProfileId(id);
 
         //holder.mContentView.setText(mValues.get(position).content);
 
@@ -76,6 +86,10 @@ public class MyDrinkCardRecyclerViewAdapter extends RecyclerView.Adapter<MyDrink
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
                     mListener.onListFragmentInteraction(holder.mItem);
+                } else if (null != mListener2) {
+                    // Notify the active callbacks interface (the activity, if the
+                    // fragment is attached to one) that an item has been selected.
+                    mListener2.onListFragmentInteraction(holder.mItem);
                 }
             }
         });
