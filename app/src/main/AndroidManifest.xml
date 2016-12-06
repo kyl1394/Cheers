@@ -72,7 +72,8 @@
 
         <receiver android:name=".Notification_receiver" />
 
-        <activity android:name=".RequestUberHomeActivity"></activity>
+        <activity android:name=".RequestUberHomeActivity" />
+        <activity android:name=".CallPersonalContactActivity"></activity>
     </application>
 
 </manifest>
