@@ -1,7 +1,9 @@
 package com.victoryroad.cheers;
 
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.icu.text.TimeZoneFormat;
@@ -144,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
         return true;
     }
 
+    static int hour, min;
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -259,7 +262,6 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
 
                 // Get return time
                 returnSelector.setOnClickListener(new View.OnClickListener() {
-
                     @Override
                     public void onClick(View v) {
                         // TODO Auto-generated method stub
@@ -272,6 +274,8 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
                                         view.setIs24HourView(false);
 
                                         try {
+                                            hour = hourOfDay;
+                                            min = minute;
                                             Date date = sdf.parse(hourOfDay + ":" + minute);
                                             returnSelector.setText(time12Format.format(date));
                                         } catch (ParseException e) {
@@ -290,6 +294,25 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
 
                     @Override
                     public void onClick(View view) {
+                        dialog.dismiss();
+                    }
+                });
+
+                Button saveButton;
+                saveButton = (Button) dialog.findViewById(R.id.save_time);
+                saveButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.set(Calendar.HOUR_OF_DAY, hour);
+                        calendar.set(Calendar.MINUTE, min);
+                        calendar.set(Calendar.SECOND, 0);
+
+                        Intent intent = new Intent(getApplicationContext(), Notification_receiver.class);
+                        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 100, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
                         dialog.dismiss();
                     }
                 });
