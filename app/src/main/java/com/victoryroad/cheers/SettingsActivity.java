@@ -1,10 +1,13 @@
 package com.victoryroad.cheers;
 
 
+import android.*;
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.media.Ringtone;
@@ -17,6 +20,7 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
 import android.provider.ContactsContract;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
@@ -203,15 +207,23 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
 
             Preference customContact = findPreference("custom_contact");
-            customContact.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    Intent i = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
-                    startActivityForResult(i, PICK_CONTACT);
-                    return true;
-                }
-            });
+                customContact.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+
+                    @Override
+                    public boolean onPreferenceClick(Preference preference) {
+                        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
+                            Intent i = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+                            startActivityForResult(i, PICK_CONTACT);
+                            return true;
+                        } else {
+                            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_CONTACTS}, 8);
+                        }
+
+                        return false;
+                    }
+                });
+
             Contact setContact = Settings.getSettingsFor(this.getActivity()).getContact();
             if(setContact != null)
                 customContact.setSummary(setContact.toString());
