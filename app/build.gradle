@@ -34,15 +34,10 @@ dependencies {
     compile 'com.google.firebase:firebase-core:10.0.1'
     compile 'com.google.firebase:firebase-database:10.0.1'
     compile 'com.google.code.gson:gson:2.4'
+    compile 'com.android.support:recyclerview-v7:24.2.1'
+    compile 'com.android.support:cardview-v7:25.0.0'
+    compile 'com.uber.sdk:rides-android:0.5.3'
     testCompile 'junit:junit:4.12'
 }
-
-
-
-
-
-
-
-
 
 apply plugin: 'com.google.gms.google-services'

@@ -29,6 +29,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.victoryroad.cheers.dataclasses.UserDat;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,6 +47,9 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.On
 
         callbackManager = CallbackManager.Factory.create();
         loginButton = (LoginButton) findViewById(R.id.login_button);
+
+//        if (loginButton != null)
+//            loginButton.setReadPermissions(Arrays.asList("user_friends"));
 
         if (!isLoggedIn()) {
             setContentView(R.layout.activity_login);
@@ -101,6 +105,7 @@ public class LoginActivity extends AppCompatActivity implements LoginFragment.On
         checkAndAddUser();
 
         if (loginButton != null) {
+            //loginButton.setReadPermissions(Arrays.asList("user_friends"));
             loginButton.setVisibility(View.INVISIBLE); //<- IMPORTANT
         }
         
