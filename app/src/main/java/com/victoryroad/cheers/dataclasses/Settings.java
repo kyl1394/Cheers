@@ -126,7 +126,7 @@ public class Settings {
         context.startActivity(loadMaps);
     }
 
-    private void makeCallWithContact(Context context) {
+    public void makeCallWithContact(Context context) {
         if(this.getContact() == null || this.getDesignatedDriver() != DesignatedDriver.CONTACT)
             return;
         Intent intent = new Intent(Intent.ACTION_DIAL);

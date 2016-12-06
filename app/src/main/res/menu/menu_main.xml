@@ -18,9 +18,15 @@
         android:title="@string/action_logout"
         app:showAsAction="never"/>
     <item
+        android:id="@+id/action_set_going_out_time"
+        android:icon="@drawable/clock"
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        android:title="Set Going Out Time"/>
+    <item
         android:id="@+id/action_add_drink"
         android:icon="@drawable/addbeer"
         android:orderInCategory="100"
-        app:showAsAction="ifRoom"
+        app:showAsAction="always"
         android:title="@string/adddrinkbutton"/>
 </menu>

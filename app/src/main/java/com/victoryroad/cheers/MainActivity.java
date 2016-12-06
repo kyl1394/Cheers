@@ -1,10 +1,21 @@
 package com.victoryroad.cheers;
 
+import android.*;
+import android.Manifest;
+import android.app.AlarmManager;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.app.PendingIntent;
+import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.icu.text.TimeZoneFormat;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.net.Uri;
+import android.provider.ContactsContract;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -37,7 +48,25 @@ import com.victoryroad.cheers.dataclasses.CheckIn;
 import com.victoryroad.cheers.dataclasses.CustomGMapInfoWindowAdapter;
 import com.victoryroad.cheers.dataclasses.UserDat;
 
+import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.TimePicker;
+
+import java.sql.Time;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.SimpleTimeZone;
+import java.util.concurrent.TimeUnit;
+
+import static com.victoryroad.cheers.R.id.container;
+import static com.victoryroad.cheers.R.id.match_global_nicknames;
+import static com.victoryroad.cheers.R.id.timeSelector;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -77,11 +106,14 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
 
     public static UserDat user;
     public static LatLng latLng;
+    public static Calendar myCalendar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        getPermissionsForApp();
 
         mLiveMapFragment = LiveMapFragment.newInstance();
         mMyFeedFragment = MyFeedFragment.newInstance("ThirdFragment", "Param 2");
@@ -100,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
+        mViewPager = (ViewPager) findViewById(container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
@@ -109,6 +141,24 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
         LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("user_friends"));
         getDrinksForFeed();
         getDrinksForCurrentUser();
+
+        myCalendar = Calendar.getInstance();
+    }
+
+    private void getPermissionsForApp() {
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_CONTACTS,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.CALL_PHONE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE, }, 8);
+        }
     }
 
 
@@ -119,6 +169,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
         return true;
     }
 
+    static int hour, min;
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -146,9 +197,161 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
                 startActivity(intent);
                 finish();
                 break;
+            case R.id.action_set_going_out_time:
+                // Create new fragment and transaction
+                final Dialog dialog = new Dialog(MainActivity.this);
+                dialog.setContentView(R.layout.fragment_set_going_out_time);
+
+                // Set default going out date
+                final EditText dateSelector = (EditText) dialog.findViewById(R.id.dateSelector);
+                Date today = Calendar.getInstance().getTime();
+                SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+                String folderName = formatter.format(today);
+                dateSelector.setText(folderName);
+                final DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int monthOfYear,
+                                          int dayOfMonth) {
+                        // TODO Auto-generated method stub
+                        myCalendar.set(Calendar.YEAR, year);
+                        myCalendar.set(Calendar.MONTH, monthOfYear);
+                        myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        updateLabel(dateSelector);
+                    }
+
+                };
+
+                dateSelector.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        // TODO Auto-generated method stub
+                        new DatePickerDialog(MainActivity.this, date, myCalendar
+                                .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                                myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+                    }
+                });
+
+                dialog.show();
+
+                // Get Current Time
+                final int mHour = myCalendar.get(Calendar.HOUR_OF_DAY);
+                final int mMinute = myCalendar.get(Calendar.MINUTE);
+                final EditText timeSelector = (EditText) dialog.findViewById(R.id.timeSelector);
+                final EditText returnSelector = (EditText) dialog.findViewById(R.id.returnSelector);
+
+                // Set default going out time to current time
+                final String time24Format = "H:mm"; //In which you need put here
+                final DateFormat sdf = new SimpleDateFormat(time24Format, Locale.US);
+                final DateFormat time12Format = SimpleDateFormat.getTimeInstance(DateFormat.SHORT);
+                Date curDate = Calendar.getInstance().getTime();
+                String goTime = time12Format.format(curDate);
+                timeSelector.setText(goTime);
+
+                timeSelector.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        // TODO Auto-generated method stub
+                        TimePickerDialog timePickerDialog = new TimePickerDialog(MainActivity.this,
+                                new TimePickerDialog.OnTimeSetListener() {
+
+                                    @Override
+                                    public void onTimeSet(TimePicker view, int hourOfDay,
+                                                          int minute) {
+                                        view.setIs24HourView(false);
+                                        String myFormat = "H:mm"; //In which you need put here
+                                        DateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+                                        try {
+                                            Date date = sdf.parse(hourOfDay + ":" + minute);
+                                            timeSelector.setText(SimpleDateFormat.getTimeInstance(DateFormat.SHORT).format(date));
+                                        } catch (ParseException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }, mHour, mMinute, false);
+                        timePickerDialog.show();
+                    }
+                });
+
+                // Set default return time to current time
+                final String returnTime24Format = "H:mm"; //In which you need put here
+                final DateFormat return_sdf = new SimpleDateFormat(returnTime24Format, Locale.US);
+                final DateFormat returnTime12Format = SimpleDateFormat.getTimeInstance(DateFormat.SHORT);
+                Date curReturnDate = Calendar.getInstance().getTime();
+                String returnTime = returnTime12Format.format(curReturnDate);
+                returnSelector.setText(returnTime);
+
+                // Get return time
+                returnSelector.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // TODO Auto-generated method stub
+                        TimePickerDialog timePickerDialog = new TimePickerDialog(MainActivity.this,
+                                new TimePickerDialog.OnTimeSetListener() {
+
+                                    @Override
+                                    public void onTimeSet(TimePicker view, int hourOfDay,
+                                                          int minute) {
+                                        view.setIs24HourView(false);
+
+                                        try {
+                                            hour = hourOfDay;
+                                            min = minute;
+                                            Date date = sdf.parse(hourOfDay + ":" + minute);
+                                            returnSelector.setText(time12Format.format(date));
+                                        } catch (ParseException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }, mHour, mMinute, false);
+                        timePickerDialog.show();
+                    }
+                });
+
+                // Cancel button action
+                Button cancelButton;
+                cancelButton = (Button) dialog.findViewById(R.id.cancel_button);
+                cancelButton.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        dialog.dismiss();
+                    }
+                });
+
+                Button saveButton;
+                saveButton = (Button) dialog.findViewById(R.id.save_time);
+                saveButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.set(Calendar.HOUR_OF_DAY, hour);
+                        calendar.set(Calendar.MINUTE, min);
+                        calendar.set(Calendar.SECOND, 0);
+
+                        Intent intent = new Intent(getApplicationContext(), Notification_receiver.class);
+                        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 100, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+                        dialog.dismiss();
+                    }
+                });
+
+                break;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void updateLabel(EditText edittext) {
+
+        String myFormat = "MM/dd/yy"; //In which you need put here
+        SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+
+        edittext.setText(sdf.format(myCalendar.getTime()));
     }
 
     @Override
