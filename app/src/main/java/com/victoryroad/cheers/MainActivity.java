@@ -1,16 +1,21 @@
 package com.victoryroad.cheers;
 
+import android.*;
+import android.Manifest;
 import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.icu.text.TimeZoneFormat;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.net.Uri;
+import android.provider.ContactsContract;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -108,6 +113,8 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        getPermissionsForApp();
+
         mLiveMapFragment = LiveMapFragment.newInstance();
         mMyFeedFragment = MyFeedFragment.newInstance("ThirdFragment", "Param 2");
         mMyFeedFragment.mAdapter = new MyDrinkCardRecyclerViewAdapter(mMyFeedFragment.CheckIns, mMyFeedFragment.mListener);
@@ -136,6 +143,22 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
         getDrinksForCurrentUser();
 
         myCalendar = Calendar.getInstance();
+    }
+
+    private void getPermissionsForApp() {
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_CONTACTS,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.CALL_PHONE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE, }, 8);
+        }
     }
 
 
