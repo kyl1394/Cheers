@@ -23,7 +23,7 @@ public class Notification_receiver extends BroadcastReceiver{
         Intent repeating_intent2 = new Intent(context, MainActivity.class);
         repeating_intent2.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 100, repeating_intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = RequestUberHomeActivity.getDismissIntent(100, context);
         PendingIntent callDDIntent = PendingIntent.getActivity(context, 101, repeating_intent2, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
@@ -31,7 +31,7 @@ public class Notification_receiver extends BroadcastReceiver{
                 .setSmallIcon(R.drawable.beer)
                 .setContentTitle("Heading Home?")
                 .setContentText("Let's make sure you get there safely.")
-                .setVibrate(new long[] {1000, 1000, 1000, 1000})
+                .setVibrate(new long[] {1000, 1000})
                 .setAutoCancel(true);
 
         builder.mActions.add(new NotificationCompat.Action(R.drawable.addbeer, "Request Uber", pendingIntent));
