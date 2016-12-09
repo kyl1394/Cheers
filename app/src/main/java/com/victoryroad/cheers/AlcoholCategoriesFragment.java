@@ -1,6 +1,7 @@
 package com.victoryroad.cheers;
 
 import android.content.Context;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -260,10 +261,26 @@ public class AlcoholCategoriesFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                // if is the final drink in the hierarchy
-                String item = listView.getItemAtPosition(position).toString();
-                createCheckin(drinkList.get(item));
-                getActivity().finish();
+                LocationManager lm = (LocationManager)getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+                boolean gps_enabled = false;
+                boolean network_enabled = false;
+
+                try {
+                    gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                } catch(Exception ex) {}
+
+                try {
+                    network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                } catch(Exception ex) {}
+
+                if(!gps_enabled && !network_enabled) {
+                    Toast.makeText(getContext(), "Please Enable Location Services", Toast.LENGTH_SHORT).show();
+                } else {
+                    // if is the final drink in the hierarchy
+                    String item = listView.getItemAtPosition(position).toString();
+                    createCheckin(drinkList.get(item));
+                    getActivity().finish();
+                }
             }
         });
 
