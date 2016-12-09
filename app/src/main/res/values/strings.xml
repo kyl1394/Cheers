@@ -196,4 +196,7 @@
     <string name="title_activity_set_going_out_time">SetGoingOutTime</string>
     <string name="pref_title_custom_set_home_location">Set Your Home Location</string>
     <string name="RequestUberText">Click To Request an Uber</string>
+    <string name="gps_network_not_enabled">Please Enable Location Servies To Use This Feature</string>
+    <string name="open_location_settings">Enable Location</string>
+    <string name="Cancel">Cancel</string>
 </resources>

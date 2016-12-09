@@ -7,15 +7,20 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.icu.text.TimeZoneFormat;
 import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -51,6 +56,7 @@ import com.victoryroad.cheers.dataclasses.UserDat;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -68,6 +74,7 @@ import static com.victoryroad.cheers.R.id.container;
 import static com.victoryroad.cheers.R.id.match_global_nicknames;
 import static com.victoryroad.cheers.R.id.timeSelector;
 
+import org.apache.log4j.chainsaw.Main;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -180,10 +187,46 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
         //noinspection SimplifiableIfStatement
         switch (id) {
             case R.id.action_add_drink:
-                // Create new fragment and transaction
-                Intent addDrinkIntent = new Intent(getApplicationContext(), AddDrinkActivity.class);
-                addDrinkIntent.putExtra("UserID", user.getUserID());
-                startActivity(addDrinkIntent);
+                LocationManager lm = (LocationManager)getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+                boolean gps_enabled = false;
+                boolean network_enabled = false;
+
+                try {
+                    gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                } catch(Exception ex) {}
+
+                try {
+                    network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                } catch(Exception ex) {}
+
+                if(!gps_enabled && !network_enabled) {
+                    // notify user
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+                    dialog.setMessage(MainActivity.this.getResources().getString(R.string.gps_network_not_enabled));
+                    dialog.setPositiveButton(MainActivity.this.getResources().getString(R.string.open_location_settings), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                            // TODO Auto-generated method stub
+                            Intent myIntent = new Intent( Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                            MainActivity.this.startActivity(myIntent);
+                            //get gps
+                        }
+                    });
+                    dialog.setNegativeButton(MainActivity.this.getString(R.string.Cancel), new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                            // TODO Auto-generated method stub
+
+                        }
+                    });
+                    dialog.show();
+                } else {
+                    // Create new fragment and transaction
+                    Intent addDrinkIntent = new Intent(getApplicationContext(), AddDrinkActivity.class);
+                    addDrinkIntent.putExtra("UserID", user.getUserID());
+                    startActivity(addDrinkIntent);
+                }
                 //finish(); // Possibly might cause issues?
                 break;
             case R.id.action_settings:
@@ -335,7 +378,7 @@ public class MainActivity extends AppCompatActivity implements LiveMapFragment.O
                         PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 100, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
                         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-                        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+                        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
                         dialog.dismiss();
                     }
                 });
